@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Manager - Transactions</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="transactions-page">
+    <div class="container">
+        <header class="header">
+            <a href="index.html" class="back-arrow">&#8592;</a>
+            <div class="profile-icon" id="profileDateDisplay">
+                </div>
+        </header>
+
+        <section class="months-nav">
+            <button class="month-button" data-month="1">Jan</button>
+            <button class="month-button" data-month="2">Feb</button>
+            <button class="month-button" data-month="3">Mar</button>
+            <button class="month-button" data-month="4">Apr</button>
+            <button class="month-button" data-month="5">May</button>
+            <button class="month-button" data-month="6">Jun</button>
+            <button class="month-button" data-month="7">Jul</button>
+            <button class="month-button" data-month="8">Aug</button>
+            <button class="month-button" data-month="9">Sep</button>
+            <button class="month-button" data-month="10">Oct</button>
+            <button class="month-button" data-month="11">Nov</button>
+            <button class="month-button" data-month="12">Dec</button>
+        </section>
+
+        <main class="main-content">
+            <div class="transactions-header-row">
+                <h2>Transactions</h2>
+                <button class="filter-button" id="filterButton">Filter</button>
+            </div>
+
+            <div id="filterOptions" style="display: none; padding: 10px; background-color: var(--card-bg); border-radius: 8px; margin-top: 10px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
+                <input type="text" id="filterKeyword" placeholder="Search description or kind..." style="width: calc(100% - 20px); padding: 8px 10px; margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 5px; font-size: 1rem;">
+                <button id="applyFilter" style="width: 100%; padding: 10px; background-color: var(--accent-blue); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem;">Apply Filter</button>
+            </div>
+
+            <section class="transactions-list" id="transactionsList">
+                <p style="text-align: center; color: var(--text-light); padding: 2rem;">Loading transactions...</p>
+            </section>
+        </main>
+
+        <button class="fab-button">+</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
