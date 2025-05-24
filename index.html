@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container" id="dashboard-page">
+        <header class="header">
+            <a href="#" class="back-arrow" style="visibility: hidden; opacity: 0;">&larr;</a>
+            <h1>Expense Manager</h1>
+            <div class="profile-icon">P</div>
+        </header>
+
+        <main class="main-content">
+            <section class="card summary-card">
+                <div class="chart-container">
+                    <canvas id="expenseChart"></canvas>
+                    <div class="net-expense-overlay">
+                        <span class="label">Net Expense</span>
+                        <span class="amount" id="netExpenseValue">₱ 0.00</span>
+                    </div>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <span class="dot food"></span>
+                        Food<span id="foodPct">0%</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="dot medicines"></span>
+                        Medicines<span id="medicinesPct">0%</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="dot shopping"></span>
+                        Shopping<span id="shoppingPct">0%</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="dot misc"></span>
+                        Misc<span id="miscPct">0%</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card limit-card">
+                <div class="limit-progress-wrapper">
+                    <svg class="progress-circle" viewBox="0 0 80 80">
+                        <circle class="progress-ring-track" r="34" cx="40" cy="40"></circle>
+                        <circle class="progress-ring-progress" r="34" cx="40" cy="40"></circle>
+                    </svg>
+                    <span class="progress-text" id="remainingBalancePct">0%</span>
+                </div>
+                <div class="limit-details">
+                    <span class="limit-title">Remaining Balance</span>
+                    <span class="limit-amount" id="remainingBalanceAmount">₱ 0.00 of ₱ 0.00</span>
+                </div>
+                <a href="transactions.html" class="arrow-link">&gt;</a>
+            </section>
+
+            <section class="card transactions-promo-card">
+                <div class="promo-text">
+                    <h2>Transactions on your hands!</h2>
+                    <a href="transactions.html" class="button">View All</a>
+                </div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQpj4q0I_0ueCPz6ofi7pE8JMqId_ZJr1bFP4aGIm0nRpDCVV-Sx52Z-pjW&s=10" alt="Card Illustration" class="card-illustration">
+            </section>
+        </main>
+    </div>
+
+    <button class="fab-button">+</button>
+
+    <script src="script.js"></script>
+</body>
+</html>
