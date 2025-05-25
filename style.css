@@ -383,6 +383,83 @@ body {
     background-color: #E0E0E0;
 }
 
+/* New Filter Options Container Styling */
+.filter-options-container {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 15px 20px; /* Adjusted padding */
+    margin: 0 20px 20px 20px; /* Matches card margin, creates separation */
+    box-shadow: var(--shadow-sm);
+    display: none; /* Hidden by default, shown by JS */
+    flex-direction: column; /* Stack dropdowns and buttons */
+    gap: 15px; /* Space between filter groups */
+}
+
+.filter-dropdown-group,
+.filter-date-group {
+    display: flex;
+    flex-direction: column; /* Stack label and input/select */
+    gap: 8px;
+}
+
+.filter-options-container label {
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.filter-options-container select,
+.filter-options-container input[type="date"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    background-color: var(--primary-bg); /* Light background for input/select */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    -webkit-appearance: none; /* Remove default styling for select */
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.filter-options-container select {
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23333333" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); /* Custom dropdown arrow */
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px; /* Make space for the arrow */
+}
+
+
+.apply-filters-button,
+.clear-filters-button {
+    background-color: var(--accent-blue);
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%; /* Make buttons full width */
+    margin-top: 5px; /* Small space between them */
+}
+
+.apply-filters-button:hover {
+    background-color: #1976D2; /* Darker blue on hover */
+}
+
+.clear-filters-button {
+    background-color: var(--text-light); /* Different color for clear */
+}
+
+.clear-filters-button:hover {
+    background-color: #555555;
+}
+
+
 /* Transactions List */
 .transactions-list {
     margin-top: 10px;
