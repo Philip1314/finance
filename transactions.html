@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Manager - Transactions</title>
+    <title>Transactions</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body id="transactions-page">
-    <div class="container">
+<body>
+    <div class="container" id="transactions-page">
         <header class="header">
-            <a href="index.html" class="back-arrow">&#8592;</a>
-            <div class="profile-icon" id="profileDateDisplay">
-                </div>
+            <a href="index.html" class="back-arrow">&larr;</a>
+            <h1>Transactions</h1>
+            <div class="profile-icon" id="profileDateDisplay"></div>
         </header>
 
-        <section class="months-nav">
+        <nav class="months-nav">
             <button class="month-button" data-month="1">Jan</button>
             <button class="month-button" data-month="2">Feb</button>
             <button class="month-button" data-month="3">Mar</button>
@@ -27,26 +28,41 @@
             <button class="month-button" data-month="10">Oct</button>
             <button class="month-button" data-month="11">Nov</button>
             <button class="month-button" data-month="12">Dec</button>
-        </section>
+        </nav>
 
         <main class="main-content">
             <div class="transactions-header-row">
-                <h2>Transactions</h2>
+                <h2>All Transactions</h2>
                 <button class="filter-button" id="filterButton">Filter</button>
             </div>
 
-            <div id="filterOptions" style="display: none; padding: 10px; background-color: var(--card-bg); border-radius: 8px; margin-top: 10px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
-                <input type="text" id="filterKeyword" placeholder="Search description or kind..." style="width: calc(100% - 20px); padding: 8px 10px; margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 5px; font-size: 1rem;">
-                <button id="applyFilter" style="width: 100%; padding: 10px; background-color: var(--accent-blue); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem;">Apply Filter</button>
+            <div class="filter-options-container" id="filterOptionsContainer">
+                <div class="filter-dropdown-group">
+                    <label for="categoryFilterDropdown">Category:</label>
+                    <select id="categoryFilterDropdown">
+                        <option value="">All Categories</option>
+                        </select>
+                </div>
+
+                <div class="filter-date-group">
+                    <label for="startDateInput">Start Date:</label>
+                    <input type="date" id="startDateInput">
+                    <label for="endDateInput">End Date:</label>
+                    <input type="date" id="endDateInput">
+                </div>
+
+                <button class="apply-filters-button" id="applyFiltersButton">Apply Filters</button>
+                <button class="clear-filters-button" id="clearFiltersButton">Clear Filters</button>
             </div>
 
-            <section class="transactions-list" id="transactionsList">
-                <p style="text-align: center; color: var(--text-light); padding: 2rem;">Loading transactions...</p>
-            </section>
-        </main>
 
-        <button class="fab-button">+</button>
+            <div class="transactions-list" id="transactionsList">
+                </div>
+        </main>
     </div>
+
+    <button class="fab-button">+</button>
+
     <script src="script.js"></script>
 </body>
 </html>
