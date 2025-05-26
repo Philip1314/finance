@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transactions</title>
+    <title>Savings</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container" id="transactions-page">
+    <div class="container" id="savings-page">
         <header class="header">
-            <button class="menu-button" id="mainMenuButton">&#9776;</button> <h1>Transactions</h1>
+            <button class="menu-button" id="mainMenuButton">&#9776;</button> <h1>Savings</h1>
             <div class="header-right-icons">
                 <div class="profile-icon night-mode-toggle" id="nightModeToggle"></div> </div>
         </header>
@@ -21,52 +21,19 @@
             <ul>
                 <li><a href="index.html">Dashboard</a></li>
                 <li><a href="transactions.html">Transactions</a></li>
-                <li><a href="savings.html">Savings</a></li> </ul>
+                <li><a href="savings.html">Savings</a></li>
+            </ul>
         </div>
 
-        <nav class="months-nav">
-            <button class="month-button" data-month="1">Jan</button>
-            <button class="month-button" data-month="2">Feb</button>
-            <button class="month-button" data-month="3">Mar</button>
-            <button class="month-button" data-month="4">Apr</button>
-            <button class="month-button" data-month="5">May</button>
-            <button class="month-button" data-month="6">Jun</button>
-            <button class="month-button" data-month="7">Jul</button>
-            <button class="month-button" data-month="8">Aug</button>
-            <button class="month-button" data-month="9">Sep</button>
-            <button class="month-button" data-month="10">Oct</button>
-            <button class="month-button" data-month="11">Nov</button>
-            <button class="month-button" data-month="12">Dec</button>
-        </nav>
-
         <main class="main-content">
-            <div class="transactions-header-row">
-                <h2>All Transactions</h2>
-                <button class="filter-button" id="filterButton">Filter</button>
-            </div>
+            <section class="card savings-detail-card">
+                <h2>Your Savings Overview</h2>
+                <p>Total Savings: <span id="totalSavingsAmount">₱ 0.00</span></p>
+                </section>
 
-            <div class="filter-options-container" id="filterOptionsContainer">
-                <div class="filter-dropdown-group">
-                    <label for="categoryFilterDropdown">Category:</label>
-                    <select id="categoryFilterDropdown">
-                        <option value="">All Categories</option>
-                        </select>
+            <div id="savingsTransactionsList" class="transactions-list">
                 </div>
-
-                <div class="filter-date-group">
-                    <label for="startDateInput">Start Date:</label>
-                    <input type="date" id="startDateInput">
-                    <label for="endDateInput">End Date:</label>
-                    <input type="date" id="endDateInput">
-                </div>
-
-                <button class="apply-filters-button" id="applyFiltersButton">Apply Filters</button>
-                <button class="clear-filters-button" id="clearFiltersButton">Clear Filters</button>
-            </div>
-
-            <div class="transactions-list" id="transactionsList">
-                </div>
-            <div class="pagination-controls" id="transactionsPaginationControls">
+            <div class="pagination-controls" id="savingsPaginationControls">
                 </div>
         </main>
     </div>

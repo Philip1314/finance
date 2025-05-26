@@ -16,6 +16,18 @@
     --accent-purple: #9C27B0; /* New color for a category if needed */
 }
 
+/* Dark Mode Variables */
+body.dark-mode {
+    --primary-bg: #2C2C2C; /* Darker background */
+    --card-bg: #3A3A3A; /* Darker card background */
+    --text-dark: #E0E0E0; /* Lighter text for headings */
+    --text-light: #AAAAAA; /* Lighter text for details */
+    --border-color: #555555; /* Darker border */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+    color: var(--text-dark);
+}
+
 body {
     font-family: 'Inter', sans-serif;
     margin: 0;
@@ -25,6 +37,7 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for dark mode */
 }
 
 .container {
@@ -34,6 +47,8 @@ body {
     min-height: 100vh;
     box-shadow: var(--shadow-md);
     overflow: hidden;
+    position: relative; /* Needed for calculator overlay positioning */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Header - Base styles for all headers */
@@ -46,66 +61,128 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Specific to dashboard header */
-#dashboard-page .header {
-    justify-content: space-between; /* Space out title, back arrow, profile icon */
-}
-#dashboard-page .header h1 {
+.header h1 {
     flex-grow: 1; /* Allow title to take available space */
-    text-align: left; /* Left-align the title */
-    margin-right: 0;
-    padding-left: 0;
-}
-#dashboard-page .header .back-arrow {
-    padding-right: 0; /* No extra padding for dashboard back arrow */
+    text-align: center; /* Center the title */
+    margin: 0; /* Remove default margin */
+    font-size: 1.5rem;
 }
 
-
-/* Specific to transactions.html header */
-#transactions-page .header {
-    justify-content: space-between; /* Simply justify content to space out arrow and date circle */
+.header-right-icons {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between icons if more are added */
 }
 
-.back-arrow {
+.menu-button {
+    background: none;
+    border: none;
     font-size: 1.8rem;
     color: var(--text-dark);
-    text-decoration: none;
-    flex-shrink: 0; /* Prevent arrow from shrinking */
+    cursor: pointer;
+    padding: 0 10px 0 0;
+    flex-shrink: 0;
+    transition: color 0.3s ease;
 }
 
-/* Updated profile-icon to also act as the date display */
+/* Updated profile-icon to also act as the date display and night mode toggle */
 .profile-icon {
-    width: 56px; /* Make it slightly larger for the date or initial 'P' */
-    height: 56px;
+    width: 40px; /* Smaller for just 'P' or a simple icon */
+    height: 40px;
     border-radius: 50%;
     background-color: var(--accent-orange);
     color: white;
     display: flex;
-    flex-direction: column; /* Stack month and day on transactions page, or center 'P' */
     justify-content: center;
     align-items: center;
     font-weight: bold;
-    font-size: 1rem; /* Adjust font size for date or 'P' */
-    line-height: 1.2; /* Spacing for stacked text */
+    font-size: 1.2rem;
+    cursor: pointer;
     flex-shrink: 0;
-    padding: 2px; /* Small padding inside circle */
+    box-shadow: var(--shadow-sm);
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-/* Styles specific to the date display within the profile-icon on transactions page */
-#transactions-page .profile-icon span:first-child { /* Month */
-    font-size: 0.8rem;
-    font-weight: normal;
+.profile-icon:active {
+    transform: scale(0.95);
 }
-#transactions-page .profile-icon span:last-child { /* Day */
-    font-size: 1.5rem;
-    font-weight: bold;
+
+/* Hamburger Menu Sidebar */
+.main-menu-sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px; /* Hidden by default */
+    width: 260px;
+    height: 100%;
+    background-color: var(--card-bg);
+    box-shadow: var(--shadow-md);
+    z-index: 1500;
+    transition: left 0.3s ease-in-out;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
+
+.main-menu-sidebar.open {
+    left: 0;
+}
+
+.main-menu-sidebar .close-sidebar-button {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--text-light);
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.main-menu-sidebar h2 {
+    color: var(--text-dark);
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 1.8rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    text-align: center;
+}
+
+.main-menu-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.main-menu-sidebar ul li {
+    margin-bottom: 15px;
+}
+
+.main-menu-sidebar ul li a {
+    text-decoration: none;
+    color: var(--text-dark);
+    font-size: 1.1rem;
+    display: block;
+    padding: 10px 0;
+    border-radius: 8px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.main-menu-sidebar ul li a:hover {
+    background-color: var(--primary-bg);
+    color: var(--accent-blue);
+}
+
 
 /* Main Content Area */
 .main-content {
     padding: 20px;
+    padding-bottom: 160px; /* Space for two FABs + calculator FAB */
 }
 
 /* Cards */
@@ -115,6 +192,7 @@ body {
     padding: 20px;
     margin-bottom: 20px;
     box-shadow: var(--shadow-sm);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Summary Card (Donut Chart) */
@@ -123,6 +201,46 @@ body {
     flex-direction: column;
     align-items: center;
 }
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 0 10px; /* Adjust as needed */
+    box-sizing: border-box;
+}
+
+.chart-header h2 {
+    font-size: 1.2rem;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.filter-button {
+    background-color: var(--primary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.filter-button:hover {
+    background-color: #E0E0E0;
+}
+body.dark-mode .filter-button {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    color: var(--text-dark);
+}
+body.dark-mode .filter-button:hover {
+    background-color: #444444;
+}
+
 
 .chart-container {
     position: relative;
@@ -211,6 +329,7 @@ body {
     stroke: var(--border-color);
     fill: transparent;
     stroke-width: 6;
+    transition: stroke 0.3s ease;
 }
 
 .progress-ring-progress {
@@ -266,6 +385,83 @@ body {
     padding-left: 10px;
     flex-shrink: 0;
 }
+
+/* Savings Card (similar to transactions promo card) */
+.savings-card {
+    background-color: var(--accent-green); /* Green background for savings */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white; /* White text for contrast */
+    padding: 15px 20px;
+    min-height: 100px;
+    overflow: hidden;
+}
+
+.savings-card .promo-text {
+    flex-basis: 60%;
+    padding-right: 10px;
+    color: inherit; /* Inherit color from parent */
+}
+
+.savings-card .promo-text h2 {
+    font-size: 1.3rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: inherit;
+}
+
+.savings-card .savings-amount {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.savings-card .mask-button {
+    background-color: rgba(255, 255, 255, 0.2); /* Slightly transparent white */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background-color 0.2s;
+}
+
+.savings-card .mask-button:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.savings-card .view-savings-button {
+    background-color: var(--card-bg); /* White background for button */
+    color: var(--accent-green); /* Green text */
+    padding: 8px 15px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: var(--shadow-sm);
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.savings-card .view-savings-button:hover {
+    background-color: #f0f0f0;
+    color: var(--accent-green);
+}
+
+.savings-card .card-illustration {
+    width: 100px;
+    height: auto;
+    display: block;
+    flex-basis: 40%;
+    max-width: 120px;
+    object-fit: contain;
+}
+
 
 /* Transactions Promo Card */
 .transactions-promo-card {
@@ -327,9 +523,22 @@ body {
     background-color: var(--card-bg);
     border-bottom: 1px solid var(--border-color);
     white-space: nowrap;
-    justify-content: flex-start;
+    /* justify-content: flex-start; */ /* Default, or use space-between if few items */
     align-items: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
+/* Scrollbar styling for .months-nav (optional, for browsers that support it) */
+.months-nav::-webkit-scrollbar {
+    height: 6px;
+}
+.months-nav::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 10px;
+}
+body.dark-mode .months-nav::-webkit-scrollbar-thumb {
+    background-color: #555;
+}
+
 
 .month-button {
     background-color: var(--primary-bg);
@@ -339,8 +548,8 @@ body {
     font-size: 0.9rem;
     color: var(--text-dark);
     cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s;
-    flex-shrink: 0;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    flex-shrink: 0; /* Prevent buttons from shrinking too much */
 }
 
 .month-button.active {
@@ -352,6 +561,9 @@ body {
 .month-button:hover:not(.active) {
     background-color: #E0E0E0;
 }
+body.dark-mode .month-button:hover:not(.active) {
+    background-color: #444444;
+}
 
 .transactions-header-row {
     display: flex;
@@ -359,7 +571,7 @@ body {
     align-items: center;
     margin-top: 20px;
     margin-bottom: 10px;
-    padding: 0 20px;
+    padding: 0 20px; /* Ensure consistent padding with lists */
 }
 
 .transactions-header-row h2 {
@@ -376,11 +588,14 @@ body {
     font-size: 0.9rem;
     color: var(--text-dark);
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .filter-button:hover {
     background-color: #E0E0E0;
+}
+body.dark-mode .filter-button:hover {
+    background-color: #444444;
 }
 
 /* New Filter Options Container Styling */
@@ -388,11 +603,12 @@ body {
     background-color: var(--card-bg);
     border-radius: 12px;
     padding: 15px 20px; /* Adjusted padding */
-    margin: 0 20px 20px 20px; /* Matches card margin, creates separation */
+    margin: 0 20px 20px 20px; /* Creates separation */
     box-shadow: var(--shadow-sm);
     display: none; /* Hidden by default, shown by JS */
     flex-direction: column; /* Stack dropdowns and buttons */
     gap: 15px; /* Space between filter groups */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .filter-dropdown-group,
@@ -422,6 +638,7 @@ body {
     -webkit-appearance: none; /* Remove default styling for select */
     -moz-appearance: none;
     appearance: none;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .filter-options-container select {
@@ -429,6 +646,9 @@ body {
     background-repeat: no-repeat;
     background-position: right 10px center;
     padding-right: 30px; /* Make space for the arrow */
+}
+body.dark-mode .filter-options-container select {
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23E0E0E0" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); /* White arrow for dark mode */
 }
 
 
@@ -461,10 +681,15 @@ body {
 
 
 /* Transactions List */
-.transactions-list {
+.transactions-list { /* This class is now used by both transactions and savings page lists */
     margin-top: 10px;
-    padding: 0 20px;
+    padding: 0 20px; /* Padding for the content within the list container */
 }
+/* Ensure transactions list has some bottom margin if pagination is present */
+.transactions-list:has(+ .pagination-controls) {
+    margin-bottom: 0; /* Remove bottom margin if pagination follows directly */
+}
+
 
 .transaction-group {
     margin-bottom: 25px;
@@ -477,6 +702,7 @@ body {
     margin-bottom: 15px;
     padding-bottom: 5px;
     border-bottom: 1px solid var(--border-color);
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 .transaction-item {
@@ -487,6 +713,7 @@ body {
     padding: 12px 15px;
     margin-bottom: 10px;
     box-shadow: var(--shadow-sm);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .transaction-category-icon {
@@ -502,11 +729,18 @@ body {
 }
 
 /* Category icon background colors */
-.transaction-category-icon.category-gain { background-color: #E8F5E9; }
-.transaction-category-icon.category-food { background-color: #FFF3E0; }
-.transaction-category-icon.category-medicines { background-color: #FFEBEE; }
-.transaction-category-icon.category-shopping { background-color: #E3F2FD; }
-.transaction-category-icon.category-misc { background-color: #EDE7F6; }
+.transaction-category-icon.category-gain { background-color: #E8F5E9; color: #388E3C; } /* Added text color for light mode */
+.transaction-category-icon.category-food { background-color: #FFF3E0; color: #FFA000; }
+.transaction-category-icon.category-medicines { background-color: #FFEBEE; color: #D32F2F; }
+.transaction-category-icon.category-shopping { background-color: #E3F2FD; color: #1976D2; }
+.transaction-category-icon.category-misc { background-color: #EDE7F6; color: #512DA8; } /* Changed default misc color slightly */
+
+/* Dark mode adjustments for icons */
+body.dark-mode .transaction-category-icon.category-gain { background-color: #388E3C; color: #C8E6C9; } /* Lighter green text for dark bg */
+body.dark-mode .transaction-category-icon.category-food { background-color: #FFA000; color: #FFECB3; }
+body.dark-mode .transaction-category-icon.category-medicines { background-color: #D32F2F; color: #FFCDD2; }
+body.dark-mode .transaction-category-icon.category-shopping { background-color: #1976D2; color: #BBDEFB; }
+body.dark-mode .transaction-category-icon.category-misc { background-color: #512DA8; color: #D1C4E9; }
 
 
 .transaction-details {
@@ -541,7 +775,41 @@ body {
     color: var(--accent-green);
 }
 
-/* Floating Action Button */
+/* Savings Page Specific Styles */
+#savings-page .main-content {
+    padding-top: 0; /* Remove top padding for savings page */
+}
+
+.savings-detail-card { /* This is the top card on savings page */
+    text-align: center;
+    padding: 25px;
+    background-color: var(--accent-blue); /* Changed from accent-blue to a distinct color or keep as is */
+    color: white;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 25px; /* Keep margin, or adjust if list is directly below */
+}
+
+.savings-detail-card h2 {
+    margin-top: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.savings-detail-card p {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.savings-detail-card #totalSavingsAmount { /* Removed goal and progressPct styling */
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Removed .progress-bar-container, .progress-bar, #editSavingsGoal styles as elements are removed */
+/* Removed .recent-savings-contributions and .contribution-item styles as elements are removed */
+
+
+/* Floating Action Buttons */
 .fab-button {
     position: fixed;
     bottom: 25px;
@@ -552,7 +820,7 @@ body {
     height: 56px;
     border-radius: 50%;
     border: none;
-    font-size: 2.5rem;
+    font-size: 2.5rem; /* For '+' icon */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -566,11 +834,380 @@ body {
     transform: scale(0.95);
 }
 
+/* .fab-button#addTransactionFab { } */ /* Default position, no specific style needed if it's the base */
+
+.fab-button.fab-calculator {
+    bottom: 90px; /* Position above the add transaction button */
+    font-size: 0.9rem; /* Smaller font for "CALC" */
+    /* padding-top: 2px; */ /* Slight adjustment for text centering, may not be needed with flex align */
+    background-color: var(--accent-blue); /* Different color for calculator */
+    line-height: 1; /* Helps center short text like CALC */
+}
+
+/* Calculator Pop-up Styling */
+.calculator-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Dimmed background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* Above all other content */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s 0.3s; /* Delay visibility transition */
+}
+
+.calculator-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s 0s;
+}
+
+.calculator-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    width: 90%; /* Max width for mobile */
+    max-width: 320px; /* Fixed width for calculator */
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(20px) scale(0.95); /* Start slightly below center and smaller */
+    transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0; /* Start hidden for transform transition */
+}
+
+.calculator-overlay.active .calculator-card {
+    transform: translateY(0) scale(1); /* Animate to center and full size */
+    opacity: 1;
+}
+
+.calculator-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+    transition: border-color 0.3s ease;
+}
+
+.calculator-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-dark);
+}
+
+.close-calculator-button {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--text-light);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 5px;
+    transition: color 0.3s ease;
+}
+
+.calculator-display {
+    width: 100%;
+    background-color: var(--primary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    font-size: 2em;
+    text-align: right;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    color: var(--text-dark);
+    font-weight: 500;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    overflow-x: auto; /* Allow horizontal scrolling for long numbers */
+    white-space: nowrap; /* Prevent line breaks */
+}
+
+.calculator-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.calc-btn {
+    background-color: var(--primary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px 0; /* Vertical padding, horizontal comes from grid gap mostly */
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: background-color 0.1s ease, transform 0.1s ease, color 0.1s ease, border-color 0.1s ease;
+    display: flex; /* For better content centering if needed */
+    justify-content: center;
+    align-items: center;
+    min-height: 50px; /* Ensure buttons have a decent touch target height */
+}
+
+.calc-btn:active {
+    transform: scale(0.95);
+}
+
+.calc-btn.clear { /* Specificity for clear button */
+    background-color: var(--accent-red) !important; /* Use important if overrides are needed */
+    color: white !important;
+    border-color: var(--accent-red) !important;
+}
+body.dark-mode .calc-btn.clear {
+    background-color: var(--accent-red) !important;
+    border-color: var(--accent-red) !important;
+}
+
+
+.calc-btn.operator { /* Specificity for operator buttons */
+    background-color: var(--accent-blue) !important;
+    color: white !important;
+    border-color: var(--accent-blue) !important;
+}
+body.dark-mode .calc-btn.operator {
+    background-color: var(--accent-blue) !important;
+    border-color: var(--accent-blue) !important;
+}
+
+.calc-btn.equals { /* Specificity for equals button */
+    background-color: var(--accent-orange) !important;
+    color: white !important;
+    border-color: var(--accent-orange) !important;
+    grid-column: span 2; /* Make equals button span two columns */
+}
+body.dark-mode .calc-btn.equals {
+    background-color: var(--accent-orange) !important;
+    border-color: var(--accent-orange) !important;
+}
+
+
+.calc-btn.digit.zero {
+    grid-column: span 2; /* Make zero button span two columns */
+}
+
+.calc-btn:hover:not(:active) { /* General hover, excluding active state */
+    filter: brightness(0.95);
+}
+
+/* Default digit/decimal button styles for dark mode, if not an operator/clear/equals */
+body.dark-mode .calc-btn:not(.clear):not(.operator):not(.equals) {
+    background-color: #4A4A4A; /* Darker background for digits */
+    color: var(--text-dark); /* Light text on dark button */
+    border-color: #666666;
+}
+body.dark-mode .calc-btn:not(.clear):not(.operator):not(.equals):hover:not(:active) {
+    background-color: #5A5A5A; /* Slightly lighter hover for dark mode digits */
+}
+
+
 /* Responsive Adjustments (Optional, for wider screens if needed) */
 @media (min-width: 600px) {
     .container {
-        border-radius: 10px;
+        /* border-radius: 10px; */ /* Keep it edge-to-edge on mobile, but maybe round on desktop */
         margin-top: 20px;
         margin-bottom: 20px;
     }
+    .main-menu-sidebar { /* Allow sidebar to be permanently visible on wider screens if desired */
+        /* left: 0; transform: translateX(0); box-shadow: none; border-right: 1px solid var(--border-color); */
+    }
+    /* Adjust .main-content padding-left if sidebar is permanent */
+}
+
+/* Pagination Controls Styling - Appended Section */
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+    padding: 20px 0; /* Increased padding for better spacing */
+    gap: 8px; /* Space between buttons */
+    margin-bottom: 10px; /* Space below pagination */
+}
+
+.pagination-controls button {
+    background-color: var(--primary-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+    padding: 8px 12px;
+    /* margin: 0 3px; */ /* Replaced by gap */
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    font-size: 0.9rem;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+    background-color: #E0E0E0; /* Lighter hover for light mode */
+    border-color: #cccccc;
+}
+body.dark-mode .pagination-controls button { /* Ensure pagination buttons also adapt to dark mode */
+    background-color: var(--card-bg); /* Use card-bg for buttons in dark mode */
+    border-color: var(--border-color);
+    color: var(--text-dark); /* This should be light text in dark mode */
+}
+
+body.dark-mode .pagination-controls button:hover:not(:disabled) {
+    background-color: #4f4f4f; /* Darker hover for dark mode */
+    border-color: #666666;
+}
+
+.pagination-controls button:disabled {
+    color: var(--text-light);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.pagination-controls button.active {
+    background-color: var(--accent-orange);
+    color: white;
+    border-color: var(--accent-orange);
+    font-weight: bold;
+}
+
+/* Style for ellipsis in pagination */
+.pagination-controls span { /* This targets the span used for "..." */
+    padding: 8px 12px; /* Match button padding */
+    color: var(--text-light);
+    font-size: 0.9rem; /* Match button font size */
+    line-height: normal; /* Adjust if needed to align with buttons */
+    display: inline-flex; /* To align with buttons */
+    align-items: center; /* To align with buttons */
+}
+
+/* Filter Modal Pop-up Styles */
+.filter-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Dimmed background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* Above all other content */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s 0.3s; /* Delay visibility transition */
+}
+
+.filter-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s 0s;
+}
+
+.filter-modal-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    width: 90%; /* Max width for mobile */
+    max-width: 320px; /* Fixed width for the modal */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(20px) scale(0.95); /* Start slightly below center and smaller */
+    transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0; /* Start hidden for transform transition */
+}
+
+.filter-modal-overlay.active .filter-modal-card {
+    transform: translateY(0) scale(1); /* Animate to center and full size */
+    opacity: 1;
+}
+
+.filter-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+    transition: border-color 0.3s ease;
+}
+
+.filter-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-dark);
+}
+
+.close-filter-modal-button {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--text-light);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 5px;
+    transition: color 0.3s ease;
+}
+
+.filter-modal-body .filter-group {
+    margin-bottom: 15px;
+}
+
+.filter-modal-body label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.filter-modal-body select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--primary-bg);
+    color: var(--text-dark);
+    font-size: 1rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cpath%20fill%3D%22%23666666%22%20d%3D%22M208.56,96.56,128,177.12,47.44,96.56a8,8,0,0,0-11.31,11.31l80,80a8,8,0,0,0,11.31,0l80-80a8,8,0,0,0-11.31-11.31Z%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.filter-modal-body select:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+}
+
+body.dark-mode .filter-modal-body select {
+    background-color: #4A4A4A;
+    border-color: #666666;
+    color: var(--text-dark);
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cpath%20fill%3D%22%23AAAAAA%22%20d%3D%22M208.56,96.56,128,177.12,47.44,96.56a8,8,0,0,0-11.31,11.31l80,80a8,8,0,0,0,11.31,0l80-80a8,8,0,0,0-11.31-11.31Z%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E');
+}
+
+.apply-filter-button {
+    background-color: var(--accent-blue);
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.apply-filter-button:hover {
+    background-color: #1976D2;
 }

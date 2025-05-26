@@ -8,16 +8,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+<body class="light-mode">
     <div class="container" id="dashboard-page">
         <header class="header">
-            <a href="#" class="back-arrow" style="visibility: hidden; opacity: 0;">&larr;</a>
-            <h1>Expense Manager</h1>
-            <div class="profile-icon">A</div>
+            <button class="menu-button" id="mainMenuButton">&#9776;</button> <h1>Expense Manager</h1>
+            <div class="header-right-icons">
+                <div class="profile-icon night-mode-toggle" id="nightModeToggle"></div>
+            </div>
         </header>
+
+        <div class="main-menu-sidebar" id="mainMenuSidebar">
+            <button class="close-sidebar-button" id="closeSidebarButton">&times;</button>
+            <h2>Menu</h2>
+            <ul>
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="transactions.html">Transactions</a></li>
+                <li><a href="savings.html">Savings</a></li>
+            </ul>
+        </div>
 
         <main class="main-content">
             <section class="card summary-card">
+                <div class="chart-header">
+                    <h2>Expense Breakdown</h2>
+                    <button id="filterChartButton" class="filter-button">Filter</button>
+                </div>
                 <div class="chart-container">
                     <canvas id="expenseChart"></canvas>
                     <div class="net-expense-overlay">
@@ -60,6 +75,16 @@
                 <a href="transactions.html" class="arrow-link">&gt;</a>
             </section>
 
+            <section class="card savings-card">
+                <div class="promo-text">
+                    <h2>Current Savings!</h2>
+                    <span class="savings-amount" id="savingsAmount">₱ 0.00</span>
+                    <button class="mask-button" id="maskSavingsButton">Mask</button>
+                    <a href="savings.html" class="view-savings-button">View Savings</a>
+                </div>
+                <img src="https://cdn-icons-png.flaticon.com/512/1453/1453653.png" alt="Savings Illustration" class="card-illustration">
+            </section>
+
             <section class="card transactions-promo-card">
                 <div class="promo-text">
                     <h2>Transactions on your hands!</h2>
@@ -70,7 +95,80 @@
         </main>
     </div>
 
-    <button class="fab-button">+</button>
+    <button class="fab-button" id="addTransactionFab">+</button>
+    <button class="fab-button fab-calculator" id="openCalculatorFab">CALC</button>
+
+    <div class="filter-modal-overlay" id="filterModalOverlay">
+        <div class="filter-modal-card">
+            <div class="filter-modal-header">
+                <h3>Filter Expenses</h3>
+                <button class="close-filter-modal-button" id="closeFilterModalButton">&times;</button>
+            </div>
+            <div class="filter-modal-body">
+                <div class="filter-group">
+                    <label for="filterMonth">Month:</label>
+                    <select id="filterMonth">
+                        <option value="All">All Months</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterYear">Year:</label>
+                    <select id="filterYear">
+                        <option value="All">All Years</option>
+                        </select>
+                </div>
+                <button id="applyChartFilter" class="apply-filter-button">Apply Filter</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="calculator-overlay" id="calculatorOverlay">
+        <div class="calculator-card" id="calculatorCard">
+            <div class="calculator-header">
+                <h3>Calculator</h3>
+                <button class="close-calculator-button" id="closeCalculatorButton">&times;</button>
+            </div>
+            <div class="calculator-body">
+                <input type="text" class="calculator-display" id="calculatorDisplay" value="0" readonly>
+                <div class="calculator-buttons">
+                    <button class="calc-btn clear" data-action="clear">C</button>
+                    <button class="calc-btn backspace" data-action="backspace">←</button>
+                    <button class="calc-btn operator" data-action="divide">/</button>
+                    <button class="calc-btn operator" data-action="multiply">*</button>
+
+                    <button class="calc-btn digit">7</button>
+                    <button class="calc-btn digit">8</button>
+                    <button class="calc-btn digit">9</button>
+                    <button class="calc-btn operator" data-action="subtract">-</button>
+
+                    <button class="calc-btn digit">4</button>
+                    <button class="calc-btn digit">5</button>
+                    <button class="calc-btn digit">6</button>
+                    <button class="calc-btn operator" data-action="add">+</button>
+
+                    <button class="calc-btn digit">1</button>
+                    <button class="calc-btn digit">2</button>
+                    <button class="calc-btn digit">3</button>
+                    <button class="calc-btn equals" data-action="calculate">=</button>
+
+                    <button class="calc-btn digit zero">0</button>
+                    <button class="calc-btn decimal" data-action="decimal">.</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
