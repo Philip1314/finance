@@ -41,7 +41,7 @@ body {
 }
 
 .container {
-    max-width: 500px;
+    max-width: 500px; /* Default max-width for smaller screens */
     margin: 0 auto;
     background-color: var(--primary-bg);
     min-height: 100vh;
@@ -1008,19 +1008,6 @@ body.dark-mode .calc-btn:not(.clear):not(.operator):not(.equals):hover:not(:acti
 }
 
 
-/* Responsive Adjustments (Optional, for wider screens if needed) */
-@media (min-width: 600px) {
-    .container {
-        /* border-radius: 10px; */ /* Keep it edge-to-edge on mobile, but maybe round on desktop */
-        margin-top: 20px;
-        margin-bottom: 20px;
-    }
-    .main-menu-sidebar { /* Allow sidebar to be permanently visible on wider screens if desired */
-        /* left: 0; transform: translateX(0); box-shadow: none; border-right: 1px solid var(--border-color); */
-    }
-    /* Adjust .main-content padding-left if sidebar is permanent */
-}
-
 /* Pagination Controls Styling - Appended Section */
 .pagination-controls {
     display: flex;
@@ -1210,4 +1197,534 @@ body.dark-mode .filter-modal-body select {
 
 .apply-filter-button:hover {
     background-color: #1976D2;
+}
+
+
+/* Media Queries for Responsiveness */
+
+/* Tablets and larger phones (e.g., 600px and up) */
+@media (min-width: 600px) {
+    .container {
+        max-width: 600px; /* Slightly wider container for tablets */
+        border-radius: 10px; /* Add some border-radius to the container */
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .header h1 {
+        font-size: 1.8rem; /* Slightly larger title */
+    }
+
+    .menu-button {
+        font-size: 2rem;
+    }
+
+    .profile-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 1.3rem;
+    }
+
+    .main-menu-sidebar {
+        width: 300px; /* Wider sidebar */
+        padding: 30px;
+    }
+
+    .main-menu-sidebar h2 {
+        font-size: 2rem;
+    }
+
+    .main-menu-sidebar ul li a {
+        font-size: 1.2rem;
+        padding: 12px 0;
+    }
+
+    .main-content {
+        padding: 30px; /* More padding for content */
+        padding-bottom: 180px; /* Adjust for FABs */
+    }
+
+    .card {
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+
+    .chart-header h2 {
+        font-size: 1.4rem;
+    }
+
+    .filter-button {
+        padding: 10px 18px;
+        font-size: 1rem;
+    }
+
+    .chart-container {
+        width: 250px; /* Larger chart */
+        height: 250px;
+    }
+
+    .net-expense-overlay .amount {
+        font-size: 1.8rem;
+    }
+
+    .legend {
+        gap: 20px;
+    }
+
+    .legend-item {
+        font-size: 1rem;
+    }
+
+    .limit-progress-wrapper {
+        width: 90px;
+        height: 90px;
+    }
+
+    .progress-text {
+        font-size: 1.3rem;
+    }
+
+    .limit-amount {
+        font-size: 1.4rem;
+    }
+
+    .arrow-link {
+        font-size: 2.2rem;
+    }
+
+    .savings-card .promo-text h2,
+    .transactions-promo-card .promo-text h2 {
+        font-size: 1.5rem;
+    }
+
+    .savings-card .savings-amount {
+        font-size: 1.6rem;
+    }
+
+    .savings-card .mask-button,
+    .savings-card .view-savings-button,
+    .transactions-promo-card .promo-text .button {
+        padding: 10px 18px;
+        font-size: 1rem;
+    }
+
+    .card-illustration {
+        width: 140px; /* Larger illustrations */
+        max-width: 160px;
+    }
+
+    .months-nav {
+        padding: 15px 30px; /* More padding for month navigation */
+        gap: 15px;
+    }
+
+    .month-button {
+        padding: 10px 18px;
+        font-size: 1rem;
+    }
+
+    .transactions-header-row {
+        margin-top: 30px;
+        margin-bottom: 15px;
+        padding: 0 30px;
+    }
+
+    .transactions-header-row h2 {
+        font-size: 1.5rem;
+    }
+
+    .filter-options-container {
+        padding: 20px 30px;
+        margin: 0 30px 30px 30px;
+        gap: 20px;
+    }
+
+    .filter-options-container label {
+        font-size: 1rem;
+    }
+
+    .filter-options-container select,
+    .filter-options-container input[type="date"] {
+        padding: 12px 15px;
+        font-size: 1rem;
+    }
+
+    .apply-filters-button,
+    .clear-filters-button {
+        padding: 12px 20px;
+        font-size: 1.1rem;
+    }
+
+    .transactions-list {
+        padding: 0 30px;
+    }
+
+    .transaction-date-header {
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+    }
+
+    .transaction-item {
+        padding: 15px 20px;
+        margin-bottom: 12px;
+    }
+
+    .transaction-category-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 1.4rem;
+        margin-right: 20px;
+    }
+
+    .transaction-name {
+        font-size: 1.1rem;
+    }
+
+    .transaction-time {
+        font-size: 0.9rem;
+    }
+
+    .transaction-amount {
+        font-size: 1.3rem;
+        margin-left: 20px;
+    }
+
+    .savings-detail-card {
+        padding: 30px;
+    }
+
+    .savings-detail-card h2 {
+        font-size: 1.8rem;
+    }
+
+    .savings-detail-card p {
+        font-size: 1.2rem;
+    }
+
+    .savings-detail-card #totalSavingsAmount {
+        font-size: 1.4rem;
+    }
+
+    .fab-button {
+        width: 60px;
+        height: 60px;
+        font-size: 2.8rem;
+        bottom: 30px;
+        right: 30px;
+    }
+
+    .fab-button.fab-calculator {
+        bottom: 100px;
+        font-size: 1rem;
+    }
+
+    .calculator-card {
+        max-width: 380px; /* Slightly larger calculator for tablets */
+        padding: 20px;
+    }
+
+    .calculator-header h3 {
+        font-size: 1.4rem;
+    }
+
+    .close-calculator-button {
+        font-size: 2rem;
+    }
+
+    .calculator-display {
+        padding: 20px;
+        font-size: 2.2em;
+    }
+
+    .calc-btn {
+        padding: 18px 0;
+        font-size: 1.4em;
+        min-height: 55px;
+    }
+
+    .filter-modal-card {
+        max-width: 380px;
+        padding: 25px;
+    }
+
+    .filter-modal-header h3 {
+        font-size: 1.4rem;
+    }
+
+    .close-filter-modal-button {
+        font-size: 2rem;
+    }
+
+    .filter-modal-body label {
+        font-size: 1rem;
+    }
+
+    .filter-modal-body select {
+        padding: 12px 15px;
+        font-size: 1.05rem;
+    }
+
+    .apply-filter-button {
+        padding: 12px 20px;
+        font-size: 1.1rem;
+    }
+}
+
+/* Larger tablets and desktops (e.g., 768px and up) */
+@media (min-width: 768px) {
+    .container {
+        max-width: 700px; /* Wider container for larger tablets/desktops */
+    }
+
+    .header {
+        padding: 20px 30px;
+    }
+
+    .header h1 {
+        font-size: 2rem;
+    }
+
+    .menu-button {
+        font-size: 2.2rem;
+    }
+
+    .profile-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.4rem;
+    }
+
+    .main-menu-sidebar {
+        width: 320px;
+    }
+
+    .main-content {
+        padding: 40px;
+        padding-bottom: 200px; /* Ensure enough space for FABs */
+    }
+
+    .card {
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+
+    .chart-header h2 {
+        font-size: 1.6rem;
+    }
+
+    .filter-button {
+        padding: 12px 20px;
+        font-size: 1.05rem;
+    }
+
+    .chart-container {
+        width: 280px;
+        height: 280px;
+    }
+
+    .net-expense-overlay .amount {
+        font-size: 2rem;
+    }
+
+    .legend {
+        gap: 25px;
+    }
+
+    .legend-item {
+        font-size: 1.05rem;
+    }
+
+    .limit-progress-wrapper {
+        width: 100px;
+        height: 100px;
+    }
+
+    .progress-text {
+        font-size: 1.5rem;
+    }
+
+    .limit-amount {
+        font-size: 1.6rem;
+    }
+
+    .arrow-link {
+        font-size: 2.5rem;
+    }
+
+    .savings-card .promo-text h2,
+    .transactions-promo-card .promo-text h2 {
+        font-size: 1.7rem;
+    }
+
+    .savings-card .savings-amount {
+        font-size: 1.8rem;
+    }
+
+    .savings-card .mask-button,
+    .savings-card .view-savings-button,
+    .transactions-promo-card .promo-text .button {
+        padding: 12px 20px;
+        font-size: 1.05rem;
+    }
+
+    .card-illustration {
+        width: 160px;
+        max-width: 180px;
+    }
+
+    .months-nav {
+        padding: 20px 40px;
+        gap: 20px;
+    }
+
+    .month-button {
+        padding: 12px 20px;
+        font-size: 1.05rem;
+    }
+
+    .transactions-header-row {
+        margin-top: 40px;
+        margin-bottom: 20px;
+        padding: 0 40px;
+    }
+
+    .transactions-header-row h2 {
+        font-size: 1.7rem;
+    }
+
+    .filter-options-container {
+        padding: 25px 40px;
+        margin: 0 40px 40px 40px;
+        gap: 25px;
+    }
+
+    .filter-options-container label {
+        font-size: 1.05rem;
+    }
+
+    .filter-options-container select,
+    .filter-options-container input[type="date"] {
+        padding: 14px 18px;
+        font-size: 1.05rem;
+    }
+
+    .apply-filters-button,
+    .clear-filters-button {
+        padding: 14px 22px;
+        font-size: 1.2rem;
+    }
+
+    .transactions-list {
+        padding: 0 40px;
+    }
+
+    .transaction-date-header {
+        font-size: 1.2rem;
+        margin-bottom: 25px;
+    }
+
+    .transaction-item {
+        padding: 18px 22px;
+        margin-bottom: 15px;
+    }
+
+    .transaction-category-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+        margin-right: 25px;
+    }
+
+    .transaction-name {
+        font-size: 1.2rem;
+    }
+
+    .transaction-time {
+        font-size: 1rem;
+    }
+
+    .transaction-amount {
+        font-size: 1.4rem;
+        margin-left: 25px;
+    }
+
+    .savings-detail-card {
+        padding: 40px;
+    }
+
+    .savings-detail-card h2 {
+        font-size: 2rem;
+    }
+
+    .savings-detail-card p {
+        font-size: 1.3rem;
+    }
+
+    .savings-detail-card #totalSavingsAmount {
+        font-size: 1.6rem;
+    }
+
+    .fab-button {
+        width: 64px;
+        height: 64px;
+        font-size: 3rem;
+        bottom: 35px;
+        right: 35px;
+    }
+
+    .fab-button.fab-calculator {
+        bottom: 110px;
+        font-size: 1.1rem;
+    }
+
+    .calculator-card {
+        max-width: 420px;
+        padding: 25px;
+    }
+
+    .calculator-header h3 {
+        font-size: 1.5rem;
+    }
+
+    .close-calculator-button {
+        font-size: 2.2rem;
+    }
+
+    .calculator-display {
+        padding: 25px;
+        font-size: 2.4em;
+    }
+
+    .calc-btn {
+        padding: 20px 0;
+        font-size: 1.5em;
+        min-height: 60px;
+    }
+
+    .filter-modal-card {
+        max-width: 420px;
+        padding: 30px;
+    }
+
+    .filter-modal-header h3 {
+        font-size: 1.5rem;
+    }
+
+    .close-filter-modal-button {
+        font-size: 2.2rem;
+    }
+
+    .filter-modal-body label {
+        font-size: 1.05rem;
+    }
+
+    .filter-modal-body select {
+        padding: 14px 18px;
+        font-size: 1.1rem;
+    }
+
+    .apply-filter-button {
+        padding: 14px 22px;
+        font-size: 1.2rem;
+    }
 }
