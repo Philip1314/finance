@@ -282,7 +282,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const savingsAmountSpan = document.getElementById('savingsAmount');
             if (savingsAmountSpan) {
                 savingsAmountSpan.dataset.actualAmount = totalSavingsAmount;
-                savingsAmountSpan.textContent = formatCurrency(totalSavingsAmount);
+                // Set to masked value initially
+                savingsAmountSpan.textContent = '₱ ●●●,●●●.●●';
+                // Also update the button text to 'Show'
+                const maskSavingsButton = document.getElementById('maskSavingsButton');
+                if (maskSavingsButton) {
+                    maskSavingsButton.textContent = 'Show';
+                }
             }
         } catch (error) {
             console.error('Error fetching or processing CSV for dashboard:', error);
