@@ -1043,6 +1043,27 @@ body.dark-mode .calc-btn:not(.clear):not(.operator):not(.equals):hover:not(:acti
         flex-basis: 30%; /* Make the image take less space */
         max-width: 80px; /* Limit the image size further */
     }
+
+    /* New/modified rules to force buttons to stack vertically on very small screens */
+    .savings-card .promo-text > div { /* This is the button wrapper */
+        flex-direction: column; /* Force vertical stacking */
+        align-items: stretch; /* Make buttons take full width when stacked */
+        gap: 0; /* Remove gap when stacking, use margin-bottom instead */
+    }
+
+    .savings-card .mask-button,
+    .savings-card .view-savings-button {
+        width: 100%; /* Ensure they take full width */
+        margin-bottom: 10px; /* Add vertical space between stacked buttons */
+        flex-grow: 0; /* No need to grow when stacking */
+        flex-shrink: 0; /* No need to shrink when stacking */
+    }
+
+    /* Remove margin-bottom from the last button in the stack */
+    .savings-card .promo-text > div button:last-child,
+    .savings-card .promo-text > div a:last-child {
+        margin-bottom: 0;
+    }
 }
 
 
