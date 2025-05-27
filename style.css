@@ -404,7 +404,7 @@ body.dark-mode .filter-button:hover {
     color: inherit; /* Inherit color from parent */
 }
 
-/* NEW: Styles for the div wrapping the buttons inside .promo-text */
+/* Styles for the div wrapping the buttons inside .promo-text */
 .savings-card .promo-text > div {
     display: flex;
     flex-wrap: wrap; /* Allow buttons to wrap to the next line */
@@ -421,7 +421,6 @@ body.dark-mode .filter-button:hover {
     font-weight: 500;
     font-size: 0.85rem;
     cursor: pointer;
-    /* Removed margin-right: 10px; as gap handles spacing now */
     transition: background-color 0.2s;
     flex-grow: 1; /* Allow button to grow to fill space */
     flex-shrink: 1; /* Allow button to shrink if needed */
@@ -1028,6 +1027,24 @@ body.dark-mode .calc-btn:not(.clear):not(.operator):not(.equals):hover:not(:acti
     }
     /* Adjust .main-content padding-left if sidebar is permanent */
 }
+
+/* Specific adjustments for very small screens */
+@media (max-width: 400px) {
+    .savings-card {
+        padding: 15px 10px; /* Reduce horizontal padding to give more internal space */
+    }
+
+    .savings-card .promo-text {
+        flex-basis: 70%; /* Give more space to the text content */
+        padding-right: 5px; /* Reduce its internal right padding slightly */
+    }
+
+    .savings-card .card-illustration {
+        flex-basis: 30%; /* Make the image take less space */
+        max-width: 80px; /* Limit the image size further */
+    }
+}
+
 
 /* Pagination Controls Styling - Appended Section */
 .pagination-controls {
