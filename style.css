@@ -41,7 +41,7 @@ body {
 }
 
 .container {
-    max-width: 500px; /* Default for mobile */
+    max-width: 500px;
     margin: 0 auto;
     background-color: var(--primary-bg);
     min-height: 100vh;
@@ -1032,6 +1032,19 @@ body.dark-mode .calc-btn:not(.clear):not(.operator):not(.equals):hover:not(:acti
 }
 
 
+/* Responsive Adjustments (Optional, for wider screens if needed) */
+@media (min-width: 600px) {
+    .container {
+        /* border-radius: 10px; */ /* Keep it edge-to-edge on mobile, but maybe round on desktop */
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    .main-menu-sidebar { /* Allow sidebar to be permanently visible on wider screens if desired */
+        /* left: 0; transform: translateX(0); box-shadow: none; border-right: 1px solid var(--border-color); */
+    }
+    /* Adjust .main-content padding-left if sidebar is permanent */
+}
+
 /* Pagination Controls Styling - Appended Section */
 .pagination-controls {
     display: flex;
@@ -1224,8 +1237,6 @@ body.dark-mode .filter-modal-body select {
 }
 
 /* Media Queries for Responsiveness */
-
-/* Mobile (max-width: 600px) */
 @media (max-width: 600px) {
     .container {
         box-shadow: none; /* Remove shadow on very small screens to save space */
@@ -1397,167 +1408,5 @@ body.dark-mode .filter-modal-body select {
     .apply-filter-button {
         font-size: 0.95rem;
         padding: 8px 12px;
-    }
-}
-
-/* Tablet (min-width: 601px and max-width: 992px) */
-@media (min-width: 601px) and (max-width: 992px) {
-    .container {
-        max-width: 768px; /* Allow container to be wider on tablets */
-        margin: 20px auto; /* Add some margin top/bottom for tablets */
-        border-radius: 12px; /* Add border-radius for a card-like appearance */
-    }
-
-    .header {
-        padding: 20px 30px; /* Slightly more padding for header */
-    }
-
-    .header h1 {
-        font-size: 1.6rem; /* Slightly larger header title */
-    }
-
-    .menu-button,
-    .profile-icon {
-        width: 45px; /* Slightly larger icons */
-        height: 45px;
-        font-size: 2rem;
-    }
-    .profile-icon {
-        font-size: 1.3rem;
-    }
-
-    .main-content {
-        padding: 30px; /* More padding around main content */
-        padding-bottom: 180px; /* Adjust for FABs */
-    }
-
-    .card {
-        padding: 25px; /* More padding inside cards */
-        margin-bottom: 25px; /* More margin between cards */
-    }
-
-    .summary-card .chart-header h2 {
-        font-size: 1.3rem; /* Slightly larger chart header title */
-    }
-
-    .net-expense-overlay .amount {
-        font-size: 1.6rem; /* Slightly larger net expense amount */
-    }
-
-    .legend-item {
-        font-size: 0.95rem; /* Slightly larger legend text */
-    }
-
-    .limit-details .limit-amount {
-        font-size: 1.3rem; /* Slightly larger limit amount */
-    }
-
-    .savings-card,
-    .transactions-promo-card {
-        padding: 20px 30px; /* More padding for promo cards */
-    }
-
-    .savings-card .promo-text h2,
-    .transactions-promo-card .promo-text h2 {
-        font-size: 1.4rem; /* Slightly larger promo card heading */
-    }
-
-    .savings-card .savings-amount {
-        font-size: 1.5rem; /* Slightly larger savings amount */
-    }
-
-    .savings-card .view-savings-button,
-    .promo-text .button {
-        padding: 9px 18px; /* Slightly larger buttons */
-        font-size: 1rem;
-    }
-
-    .months-nav {
-        padding: 12px 30px; /* More padding for month navigation */
-        gap: 12px; /* More space between month buttons */
-    }
-
-    .month-button,
-    .filter-button {
-        padding: 9px 18px; /* Slightly larger button padding */
-        font-size: 0.95rem; /* Slightly larger font for buttons */
-    }
-
-    .transactions-header-row {
-        padding: 0 30px; /* Adjust padding for header row */
-    }
-
-    .transactions-header-row h2 {
-        font-size: 1.4rem; /* Slightly larger transactions header */
-    }
-
-    .transactions-list {
-        padding: 0 30px; /* Adjust padding for transactions list */
-    }
-
-    .transaction-item {
-        padding: 15px 20px; /* Slightly more padding for transaction items */
-    }
-
-    .transaction-category-icon {
-        width: 45px; /* Slightly larger icons in transaction list */
-        height: 45px;
-        font-size: 1.4rem;
-        margin-right: 20px; /* More margin */
-    }
-
-    .transaction-name {
-        font-size: 1.05rem; /* Slightly larger transaction name */
-    }
-
-    .transaction-time {
-        font-size: 0.85rem; /* Slightly larger transaction time */
-    }
-
-    .transaction-amount {
-        font-size: 1.2rem; /* Slightly larger transaction amount */
-        margin-left: 20px; /* More margin */
-    }
-
-    .fab-button {
-        width: 60px; /* Slightly larger FABs */
-        height: 60px;
-        font-size: 2.8rem;
-        bottom: 30px;
-        right: 30px;
-    }
-
-    .fab-button.fab-calculator {
-        bottom: 100px; /* Adjust position for calculator FAB */
-        font-size: 1rem;
-    }
-
-    .calculator-card,
-    .filter-modal-card {
-        max-width: 360px; /* Allow modals to be slightly wider */
-        padding: 25px;
-    }
-
-    .calculator-display {
-        font-size: 2.2em; /* Slightly larger display font */
-        padding: 18px;
-    }
-
-    .calc-btn {
-        padding: 18px 0; /* Adjust calculator button padding */
-        font-size: 1.3em;
-        min-height: 55px; /* Slightly larger min height for buttons */
-    }
-
-    .filter-modal-header h3 {
-        font-size: 1.3rem;
-    }
-    .filter-modal-body select {
-        font-size: 1rem;
-        padding: 10px 12px;
-    }
-    .apply-filter-button {
-        font-size: 1.05rem;
-        padding: 10px 15px;
     }
 }
