@@ -399,17 +399,41 @@ body.dark-mode .filter-button:hover {
 }
 
 .savings-card .promo-text {
-    flex-basis: 60%; /* This is outside media query */
+    flex-basis: 60%;
     padding-right: 10px;
     color: inherit; /* Inherit color from parent */
 }
 
-/* Styles for the div wrapping the buttons inside .promo-text */
-.savings-card .promo-text > div {
+.savings-card .promo-text h2 {
+    font-size: 1.3rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: inherit;
+}
+
+.savings-card .savings-amount {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+/* This is where the new styles are added/modified */
+.savings-card .promo-text .amount-and-button-wrapper {
     display: flex;
-    flex-wrap: wrap; /* Allow buttons to wrap to the next line */
-    gap: 10px; /* Space between buttons */
-    margin-top: 15px; /* Add some space above the buttons */
+    align-items: center; /* Align items vertically in the middle */
+    gap: 10px; /* Space between amount and show button */
+    margin-bottom: 10px; /* Space before view savings button */
+    flex-wrap: wrap; /* Allow wrapping on very small screens */
+    justify-content: flex-start; /* Align to start for consistency */
+}
+
+.savings-card .promo-text .amount-and-button-wrapper .savings-amount {
+    margin: 0; /* Remove existing margin to prevent double spacing */
+    flex-grow: 1; /* Allow amount to take available space */
+    min-width: 0; /* Allow it to shrink if needed */
+    word-break: break-word; /* Ensure text breaks */
+    overflow-wrap: break-word;
 }
 
 .savings-card .mask-button {
@@ -421,10 +445,10 @@ body.dark-mode .filter-button:hover {
     font-weight: 500;
     font-size: 0.85rem;
     cursor: pointer;
+    /* Removed margin-right: 10px; as gap handles spacing */
     transition: background-color 0.2s;
-    flex-grow: 1; /* Allow button to grow to fill space */
-    flex-shrink: 1; /* Allow button to shrink if needed */
-    min-width: fit-content; /* Ensure content is not squished */
+    flex-shrink: 0; /* Prevent button from shrinking */
+    min-width: fit-content; /* Ensure button content doesn't break */
 }
 
 .savings-card .mask-button:hover {
@@ -441,9 +465,11 @@ body.dark-mode .filter-button:hover {
     font-size: 0.95rem;
     box-shadow: var(--shadow-sm);
     transition: background-color 0.2s, color 0.2s;
-    flex-grow: 1; /* Allow button to grow to fill space */
-    flex-shrink: 1; /* Allow button to shrink if needed */
-    min-width: fit-content; /* Ensure content is not squished */
+    display: block; /* Make it a block element */
+    width: 100%; /* Make it take full width */
+    text-align: center; /* Center the text inside */
+    box-sizing: border-box; /* Include padding/border in width calculation */
+    margin-top: 0; /* Ensure no extra top margin from previous flex context */
 }
 
 .savings-card .view-savings-button:hover {
@@ -1009,66 +1035,15 @@ body.dark-mode .calc-btn:not(.clear):not(.operator):not(.equals):hover:not(:acti
 /* Responsive Adjustments (Optional, for wider screens if needed) */
 @media (min-width: 600px) {
     .container {
-        max-width: 960px; /* Allow container to expand up to 960px on larger screens */
-        width: 90%; /* Use a percentage for flexibility */
-        margin: 20px auto; /* Center the container with vertical margins */
-        border-radius: 12px; /* Optional: add border-radius for desktop */
-        min-height: auto; /* Adjust min-height for desktop */
+        /* border-radius: 10px; */ /* Keep it edge-to-edge on mobile, but maybe round on desktop */
+        margin-top: 20px;
+        margin-bottom: 20px;
     }
-    .main-content {
-        padding: 30px; /* Increase padding for desktop view */
-    }
-    .calculator-card, .filter-modal-card {
-        max-width: 380px; /* Allow calculator/modal to be a bit wider but still fixed */
-    }
-    /* Adjust menu sidebar for desktop if desired, e.g., always visible */
-    .main-menu-sidebar {
+    .main-menu-sidebar { /* Allow sidebar to be permanently visible on wider screens if desired */
         /* left: 0; transform: translateX(0); box-shadow: none; border-right: 1px solid var(--border-color); */
     }
     /* Adjust .main-content padding-left if sidebar is permanent */
 }
-
-/* Specific adjustments for very small screens */
-@media (max-width: 400px) {
-    .savings-card {
-        padding: 15px 10px; /* Reduce horizontal padding to give more internal space */
-    }
-
-    .savings-card .promo-text {
-        flex-basis: 70%; /* Give more space to the text content */
-        padding-right: 5px; /* Reduce its internal right padding slightly */
-    }
-
-    /* New: Ensure text inside promo-text wraps and doesn't cause overflow */
-    .savings-card .promo-text h2,
-    .savings-card .promo-text p {
-        word-break: break-word; /* Break long words that don't fit */
-        overflow-wrap: break-word; /* Standard property for wrapping long words */
-        min-width: 0; /* Allows flex items to shrink below their content size if necessary */
-    }
-
-    /* Rules to force buttons to stack vertically on very small screens */
-    .savings-card .promo-text > div { /* This is the button wrapper */
-        flex-direction: column; /* Force vertical stacking */
-        align-items: stretch; /* Make buttons take full width when stacked */
-        gap: 0; /* Remove gap when stacking, use margin-bottom instead */
-    }
-
-    .savings-card .mask-button,
-    .savings-card .view-savings-button {
-        width: 100%; /* Ensure they take full width */
-        margin-bottom: 10px; /* Add vertical space between stacked buttons */
-        flex-grow: 0; /* No need to grow when stacking */
-        flex-shrink: 0; /* No need to shrink when stacking */
-    }
-
-    /* Remove margin-bottom from the last button in the stack */
-    .savings-card .promo-text > div button:last-child,
-    .savings-card .promo-text > div a:last-child {
-        margin-bottom: 0;
-    }
-}
-
 
 /* Pagination Controls Styling - Appended Section */
 .pagination-controls {
