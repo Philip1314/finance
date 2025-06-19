@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const CSV_URL = 'https://docs.google.com/sheets/d/e/2PACX-1vQgMFbI8pivLbRpc2nL2Gyoxw47PmXEVxvUDrjr-t86gj4-J3QM8uV7m8iJN9wxlYo3IY5FQqqUICei/pub?output=csv';
-    const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdrDJoOeo264aOn4g2UEh-K-FHpbssBAVmEtOWoW46Q1cwjgg/viewform?usp=header'; // Corrected GOOGLE_FORM_URL based on previous context, ensure it is correct.
+    // Reverted to the original CSV_URL from the user's initial script (1).js for stability.
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgMFbI8pivLbRpc2nL2Gyoxw47PmXEVxvUDrjr-t86gj4-J3QM8uV7m8iJN9wxlYo3IY5FQqqUICei/pub?output=csv';
+    const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdrDJoOeo264aOn4g2UEh-K-FHpbssBAVmEtOWoW46Q1cwjgg/viewform?usp=header';
 
     // --- Pagination Globals ---
     const ITEMS_PER_PAGE = 15;
@@ -19,8 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Google One', dueDay: 29 },
         { name: 'Converge', dueDay: 20 }
     ];
-    // No longer using paidBills Set for persistence, moved to transaction-based checking
 
+    /**
+     * Parses a CSV string into an array of objects.
+     * @param {string} csv - The CSV data as a string.
+     * @returns {Array<Object>} An array of objects, where each object represents a row.
+     */
     function parseCSV(csv) {
         const lines = csv.split('\n').filter(line => line.trim() !== '');
         if (lines.length === 0) return [];
@@ -43,6 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return data;
     }
 
+    /**
+     * Formats a number as a currency string (Philippine Peso).
+     * @param {number|string} amount - The amount to format.
+     * @returns {string} The formatted currency string.
+     */
     function formatCurrency(amount) {
         const numAmount = parseFloat(amount);
         if (isNaN(numAmount)) {
@@ -51,6 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return `₱ ${numAmount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
 
+    /**
+     * Maps a transaction entry to a display category and icon.
+     * @param {Object} entry - The transaction entry object.
+     * @returns {{category: string, icon: string}} An object containing the category name and its corresponding emoji icon.
+     */
     function mapCategoryAndIcon(entry) {
         let category = 'Misc';
         let icon = '✨';
@@ -65,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'allowance': icon = '🎁'; break;
                 case 'savings contribution':
                 case 'savings':
-                    icon = '💰'; break;
+                    icon = '💰'; break; // Could be a savings deposit or withdrawal indicator
                 default: icon = '💰'; break;
             }
         } else if (lowerCaseType === 'expenses') {
@@ -73,10 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'food': case 'groceries': category = 'Food'; icon = '🍔'; break;
                 case 'medicines': category = 'Medicines'; icon = '💊'; break;
                 case 'online shopping': category = 'Shopping'; icon = '🛍️'; break;
-                case 'transportation': category = 'Transportation'; icon = '🚌'; break; // Added Transportation
-                case 'utility bills': category = 'Utility Bills'; icon = '💡'; break; // Added Utility Bills
+                case 'transportation': category = 'Transportation'; icon = '🚌'; break;
+                case 'utility bills': category = 'Utility Bills'; icon = '💡'; break;
                 case 'savings':
-                    icon = '📉';
+                    icon = '📉'; // Icon indicating expenditure towards savings
                     break;
                 default: category = 'Misc'; icon = '✨'; break;
             }
@@ -93,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         body.classList.add('light-mode');
     }
+
     if (nightModeToggle) {
         nightModeToggle.addEventListener('click', () => {
             if (body.classList.contains('light-mode')) {
@@ -104,8 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body.classList.add('light-mode');
                 localStorage.setItem('theme', 'light-mode');
             }
-            // Re-render chart and upcoming bills to apply new colors based on current filters
-            // For dashboard, re-apply filters that might be set
+            // For dashboard, re-apply filters that might be set to update chart colors
             if (document.getElementById('dashboard-page')) {
                 const filterMonthSelect = document.getElementById('filterMonth');
                 const filterYearSelect = document.getElementById('filterYear');
@@ -132,13 +147,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Dashboard Specific Logic (index.html) ---
+    /**
+     * Updates the dashboard view with filtered data and renders charts/summaries.
+     * This function now always calculates total savings from ALL transactions.
+     * @param {string} filterMonth - The month to filter by ('All' or 1-12).
+     * @param {string} filterYear - The year to filter by ('All' or specific year).
+     */
     async function updateDashboard(filterMonth = 'All', filterYear = 'All') {
         if (!document.getElementById('dashboard-page')) return;
         try {
             const response = await fetch(CSV_URL);
             const csv = await response.text();
-            allTransactionsData = parseCSV(csv); // Store all data for filtering
+            allTransactionsData = parseCSV(csv); // Store all data globally
 
             // Populate year filter dropdown
             const years = new Set();
@@ -169,18 +189,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 filterMonthSelect.value = filterMonth;
             }
 
+            // Calculate total savings from ALL transactions (not filtered by month/year)
+            let totalSavingsAmountOverall = 0;
+            allTransactionsData.forEach(entry => {
+                const amount = parseFloat(entry.Amount);
+                const entryType = entry.Type ? entry.Type.toLowerCase() : '';
+                const entryWhatKind = entry['What kind?'] ? entry['What kind?'].toLowerCase() : '';
 
-            let totalExpensesAmount = 0;
-            let totalGainsAmount = 0;
-            let totalSavingsAmount = 0; // Initialize savings total
-            const expenseCategoriesForChart = { Food: 0, Medicines: 0, Shopping: 0, Misc: 0 }; // Initialize with 0 for all categories
+                if (isNaN(amount) || !entryType) {
+                    console.warn('Savings Calculation - Skipping malformed entry:', entry);
+                    return;
+                }
 
-            // Filter data based on selected month/year BEFORE calculating sums
+                if (entryType === 'expenses' && entryWhatKind === 'savings') {
+                    // Money spent on "savings" increases totalSavingsAmountOverall (money moved INTO savings)
+                    totalSavingsAmountOverall += amount;
+                } else if (entryType === 'gains' && (entryWhatKind === 'savings contribution' || entryWhatKind === 'savings')) {
+                    // Money gained from "savings contribution" decreases totalSavingsAmountOverall (money moved OUT of general funds, into savings)
+                    totalSavingsAmountOverall -= amount;
+                }
+            });
+
+            // Update savings display on dashboard
+            const savingsAmountSpan = document.getElementById('savingsAmount');
+            if (savingsAmountSpan) {
+                savingsAmountSpan.dataset.actualAmount = totalSavingsAmountOverall;
+                // If it was unmasked before, re-mask it by default on page load or filter change
+                const maskSavingsButton = document.getElementById('maskSavingsButton');
+                if (maskSavingsButton && maskSavingsButton.textContent === 'Mask') {
+                     savingsAmountSpan.textContent = formatCurrency(totalSavingsAmountOverall);
+                } else {
+                     savingsAmountSpan.textContent = '₱ ●●●,●●●.●●'; // Masked display
+                }
+            }
+
+
+            // Calculations for the Expense Breakdown chart (filtered by month/year)
+            let totalExpensesAmountFiltered = 0;
+            let totalGainsAmountFiltered = 0;
+            const expenseCategoriesForChart = { Food: 0, Medicines: 0, Shopping: 0, Misc: 0 };
+
             const filteredDashboardData = allTransactionsData.filter(entry => {
                 const entryDate = new Date(entry.Date);
-                if (isNaN(entryDate.getTime())) return false; // Skip invalid dates
+                if (isNaN(entryDate.getTime())) return false;
 
-                const entryMonth = entryDate.getMonth() + 1; // 1-indexed month
+                const entryMonth = entryDate.getMonth() + 1;
                 const entryYear = entryDate.getFullYear();
 
                 const matchesMonth = (filterMonth === 'All' || entryMonth === parseInt(filterMonth));
@@ -194,35 +247,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 const entryType = entry.Type ? entry.Type.toLowerCase() : '';
                 const entryWhatKind = entry['What kind?'] ? entry['What kind?'].toLowerCase() : '';
 
-                if (isNaN(amount) || !entryType) {
-                    console.warn('Dashboard - Skipping malformed entry:', entry);
-                    return;
-                }
+                if (isNaN(amount) || !entryType) return; // Skip malformed entries
 
                 if (entryType === 'expenses') {
-                    totalExpensesAmount += amount;
-                    // Accumulate for categories based on 'What kind?'
+                    totalExpensesAmountFiltered += amount;
                     if (entryWhatKind === 'food' || entryWhatKind === 'groceries') expenseCategoriesForChart.Food += amount;
                     else if (entryWhatKind === 'medicines') expenseCategoriesForChart.Medicines += amount;
                     else if (entryWhatKind === 'online shopping') expenseCategoriesForChart.Shopping += amount;
-                    else expenseCategoriesForChart.Misc += amount; // All other expenses go to Misc
-
-                    if (entryWhatKind === 'savings') {
-                        totalSavingsAmount += amount;
-                    }
-
+                    else expenseCategoriesForChart.Misc += amount;
                 } else if (entryType === 'gains') {
-                    totalGainsAmount += amount;
-                    if (entryWhatKind === 'savings contribution' || entryWhatKind === 'savings') {
-                        totalSavingsAmount -= amount;
-                    }
+                    totalGainsAmountFiltered += amount;
                 }
             });
 
-            document.getElementById('netExpenseValue').textContent = formatCurrency(totalExpensesAmount);
-            const remainingBalance = totalGainsAmount - totalExpensesAmount;
-            const totalIncomeOrBudget = totalGainsAmount;
+            document.getElementById('netExpenseValue').textContent = formatCurrency(totalExpensesAmountFiltered);
+            const remainingBalance = totalGainsAmountFiltered - totalExpensesAmountFiltered;
+            const totalIncomeOrBudget = totalGainsAmountFiltered; // Assuming total gains is the budget for the period
             document.getElementById('remainingBalanceAmount').textContent = `${formatCurrency(remainingBalance)} of ${formatCurrency(totalIncomeOrBudget)}`;
+
             let remainingBalancePercentage = totalIncomeOrBudget > 0 ? (remainingBalance / totalIncomeOrBudget) * 100 : 0;
             const displayPercentage = isNaN(remainingBalancePercentage) ? 0 : Math.round(remainingBalancePercentage);
             document.getElementById('remainingBalancePct').textContent = `${displayPercentage}%`;
@@ -248,12 +290,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 progressCircle.style.stroke = progressColor;
             }
 
-            // Filter out categories with 0 amounts for chart and legend display
             const categoryNames = Object.keys(expenseCategoriesForChart).filter(cat => expenseCategoriesForChart[cat] > 0);
             const categoryAmounts = categoryNames.map(cat => expenseCategoriesForChart[cat]);
             const totalCategoryExpenseForChart = categoryAmounts.reduce((sum, amount) => sum + amount, 0);
 
-            // Dynamically update legend percentages based on *filtered* total
             document.getElementById('foodPct').textContent = `${totalCategoryExpenseForChart > 0 ? Math.round((expenseCategoriesForChart.Food / totalCategoryExpenseForChart) * 100) : 0}%`;
             document.getElementById('medicinesPct').textContent = `${totalCategoryExpenseForChart > 0 ? Math.round((expenseCategoriesForChart.Medicines / totalCategoryExpenseForChart) * 100) : 0}%`;
             document.getElementById('shoppingPct').textContent = `${totalCategoryExpenseForChart > 0 ? Math.round((expenseCategoriesForChart.Shopping / totalCategoryExpenseForChart) * 100) : 0}%`;
@@ -289,22 +329,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
-            const savingsAmountSpan = document.getElementById('savingsAmount');
-            if (savingsAmountSpan) {
-                savingsAmountSpan.dataset.actualAmount = totalSavingsAmount;
-                // Set to masked value initially
-                // The HTML is already set to masked, so just ensure the actual amount is stored.
-                // If it was unmasked before, re-mask it.
-                if (maskSavingsButton && maskSavingsButton.textContent === 'Mask') {
-                     savingsAmountSpan.textContent = formatCurrency(totalSavingsAmount);
-                } else {
-                     savingsAmountSpan.textContent = '₱ ●●●,●●●.●●';
-                }
-            }
-            renderUpcomingBills(); // Call this after updating dashboard data
+
+            renderUpcomingBills(); // Call this after allTransactionsData is populated and dashboard updated
         } catch (error) {
             console.error('Error fetching or processing CSV for dashboard:', error);
-            // Handle errors gracefully
+            // Display a user-friendly error message on the dashboard if data fails to load
+            document.getElementById('netExpenseValue').textContent = '₱ Error';
+            document.getElementById('remainingBalanceAmount').textContent = 'Data Error';
+            document.getElementById('remainingBalancePct').textContent = 'ERR%';
+            const expenseChartContainer = document.querySelector('.chart-container');
+            if (expenseChartContainer) {
+                expenseChartContainer.innerHTML = '<p style="text-align: center; color: var(--accent-red); padding: 2rem;">Could not load expense data.</p>';
+            }
         }
     }
 
@@ -313,11 +349,12 @@ document.addEventListener('DOMContentLoaded', () => {
         maskSavingsButton.addEventListener('click', () => {
             const savingsAmountSpan = document.getElementById('savingsAmount');
             if (savingsAmountSpan) {
+                // Toggle between masked and actual amount
                 if (savingsAmountSpan.textContent.includes('●')) {
                     savingsAmountSpan.textContent = formatCurrency(savingsAmountSpan.dataset.actualAmount || 0);
                     maskSavingsButton.textContent = 'Mask';
                 } else {
-                    savingsAmountSpan.textContent = '₱ ●●●,●●●.●●'; // Adjusted mask
+                    savingsAmountSpan.textContent = '₱ ●●●,●●●.●●'; // Masked display
                     maskSavingsButton.textContent = 'Show';
                 }
             }
@@ -360,7 +397,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- New: Upcoming Bills Logic ---
+    // --- Upcoming Bills Logic ---
+
+    /**
+     * Calculates the next upcoming salary date based on a bi-weekly schedule starting June 20, 2025.
+     * @returns {Date} The date of the next salary payment.
+     */
     function calculateNextSalaryDate() {
         const today = new Date();
         today.setHours(0,0,0,0); // Normalize today to start of day
@@ -369,30 +411,37 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentIterDate = new Date(firstPayday);
 
         // Find the *first* payday that is greater than or equal to today
+        // This 'currentIterDate' will be the payday that 'covers' the current period's bills.
         while (currentIterDate < today) {
             currentIterDate.setDate(currentIterDate.getDate() + 14); // Add two weeks
         }
 
-        // If today is a payday (currentIterDate === today), then the "upcoming" salary
-        // for the *next* period is two weeks from now.
-        // Otherwise, currentIterDate is already the upcoming payday for the current period.
+        // If 'currentIterDate' is exactly 'today', it means today is a payday.
+        // In this case, the "upcoming scheduled salary" for which bills will show
+        // is the *next* payday (two weeks from now), meaning bills due *after* today's payday.
+        // If 'currentIterDate' is in the future relative to 'today', then 'currentIterDate' is already the target.
         if (currentIterDate.getTime() === today.getTime()) {
-             // If today is a payday, we want to look at bills due *before* the *next* payday
              currentIterDate.setDate(currentIterDate.getDate() + 14);
         }
 
         return currentIterDate;
     }
 
+    /**
+     * Determines which upcoming bills to display based on due dates and payment status.
+     * A bill is considered "paid" if a transaction exists within a 5-day window around its due date
+     * and its description/kind matches the bill name.
+     * @returns {Array<Object>} A list of bills to display.
+     */
     function getUpcomingBills() {
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Normalize to start of day
-        const nextSalaryDate = calculateNextSalaryDate();
+        const nextSalaryDate = calculateNextSalaryDate(); // The payday marking the end of the period for bill display
 
         const upcomingBills = [];
 
         BILLS.forEach(bill => {
-            let nextDueDate = new Date(today.getFullYear(), today.getMonth(), 1); // Start of current month
+            let nextDueDate = new Date(today.getFullYear(), today.getMonth(), 1); // Start of current month for calculating due date
 
             if (bill.dueDay === 'end') {
                 nextDueDate = new Date(today.getFullYear(), today.getMonth() + 1, 0); // Last day of current month
@@ -400,7 +449,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 nextDueDate.setDate(bill.dueDay); // Set to specific day of current month
             }
 
-            // If the calculated nextDueDate is in the past, move it to the next month
+            // If the calculated nextDueDate is in the past, move it to the next month/year
+            // This ensures we always get a future or present due date.
             while (nextDueDate < today) {
                 nextDueDate.setMonth(nextDueDate.getMonth() + 1);
                 if (bill.dueDay === 'end') {
@@ -410,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // Define the payment window for this bill
+            // Define the payment window for this bill: 5 days before to 5 days after due date
             const paymentWindowStart = new Date(nextDueDate);
             paymentWindowStart.setDate(nextDueDate.getDate() - 5);
             paymentWindowStart.setHours(0, 0, 0, 0);
@@ -422,6 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let isBillPaid = false;
 
             // Check if there's a transaction marking this bill as paid
+            // Use allTransactionsData, which should be globally available and fully populated.
             for (const transaction of allTransactionsData) {
                 const transactionDate = new Date(transaction.Date);
                 transactionDate.setHours(0, 0, 0, 0);
@@ -429,17 +480,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 const transactionDescription = (transaction.Description || transaction['What kind?'] || '').toLowerCase();
                 const billNameLower = bill.name.toLowerCase();
 
-                // Check for date range and name match and if it's an expense
-                if (transactionDate >= paymentWindowStart && transactionDate <= paymentWindowEnd &&
-                    (transactionDescription.includes(billNameLower) || billNameLower.includes(transactionDescription)) &&
-                    transaction.Type.toLowerCase() === 'expenses') { // Assuming bill payments are 'expenses'
+                // Check for date range, type 'expenses', and flexible name match
+                const transactionWithinWindow = (transactionDate >= paymentWindowStart && transactionDate <= paymentWindowEnd);
+                const isExpenseType = (transaction.Type && transaction.Type.toLowerCase() === 'expenses');
+                
+                // Flexible name matching: bill name in description OR description in bill name
+                const nameMatches = (transactionDescription.includes(billNameLower) || billNameLower.includes(transactionDescription));
+
+                if (transactionWithinWindow && isExpenseType && nameMatches) {
                     isBillPaid = true;
                     break; // Found a payment, no need to check further for this bill
                 }
             }
 
-            // Only include bills whose due date is before or on the next salary date AND are not yet paid
-            if (nextDueDate <= nextSalaryDate && !isBillPaid) {
+            // Only include bills whose due date falls within the current salary period (today to nextSalaryDate)
+            // AND have not been marked as paid by a transaction.
+            if (nextDueDate >= today && nextDueDate <= nextSalaryDate && !isBillPaid) {
                 upcomingBills.push({
                     name: bill.name,
                     dueDate: nextDueDate,
@@ -453,6 +509,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return upcomingBills;
     }
 
+    /**
+     * Renders the upcoming bills list on the dashboard.
+     */
     function renderUpcomingBills() {
         const upcomingBillsListDiv = document.getElementById('upcomingBillsList');
         if (!upcomingBillsListDiv) return;
@@ -482,21 +541,20 @@ document.addEventListener('DOMContentLoaded', () => {
             dateSpan.textContent = `Due: ${bill.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
             detailsDiv.appendChild(dateSpan);
             
-            // Amount display (if available)
-            // const amountSpan = document.createElement('span');
-            // amountSpan.classList.add('upcoming-bill-amount');
-            // amountSpan.textContent = formatCurrency(bill.amount);
-            // detailsDiv.appendChild(amountSpan);
-
             billItemDiv.appendChild(detailsDiv);
-
-            // Removed the "Mark as Paid" button as per new requirements
             upcomingBillsListDiv.appendChild(billItemDiv);
         });
     }
 
 
     // --- Generic Pagination Setup ---
+    /**
+     * Sets up pagination controls for a given list.
+     * @param {HTMLElement} containerElement - The DOM element to append pagination buttons to.
+     * @param {number} totalPages - Total number of pages.
+     * @param {number} currentPage - The currently active page.
+     * @param {function(number): void} onPageChangeCallback - Callback function when a page button is clicked.
+     */
     function setupPaginationControls(containerElement, totalPages, currentPage, onPageChangeCallback) {
         containerElement.innerHTML = ''; // Clear existing controls
         if (totalPages <= 1) return;
@@ -558,6 +616,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Transactions Page Specific Logic (transactions.html) ---
+    /**
+     * Fetches and processes transaction data for the transactions page.
+     * Initializes filters and renders transactions for the current month.
+     */
     async function fetchAndProcessTransactions() {
         if (!document.getElementById('transactions-page')) return;
         try {
@@ -587,6 +649,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    /**
+     * Populates the category filter dropdown on the transactions page.
+     */
     function populateCategoryFilter() {
         const categoryFilterDropdown = document.getElementById('categoryFilterDropdown');
         if (!categoryFilterDropdown) return;
@@ -621,6 +686,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    /**
+     * Renders transactions based on selected filters and pagination.
+     * @param {number|null} selectedMonth - The month to filter by (1-12), or null for date range/all.
+     * @param {string} selectedCategory - The category to filter by, or empty string for all.
+     * @param {string|null} startDate - Start date string for range filter (YYYY-MM-DD), or null.
+     * @param {string|null} endDate - End date string for range filter (YYYY-MM-DD), or null.
+     */
     function renderTransactions(selectedMonth, selectedCategory = '', startDate = null, endDate = null) {
         const transactionsListDiv = document.getElementById('transactionsList');
         const paginationControlsDiv = document.getElementById('transactionsPaginationControls');
@@ -628,11 +700,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let filteredData = allTransactionsData.filter(entry => {
             const amount = parseFloat(entry.Amount);
-            const date = new Date(entry.Date); // CSV Date
+            const date = new Date(entry.Date);
             const entryType = entry.Type ? entry.Type.toLowerCase() : '';
             const entryWhatKind = entry['What kind?'] ? entry['What kind?'].toLowerCase() : '';
 
-            if (isNaN(amount) || isNaN(date.getTime()) || !entryType) { // Check date validity
+            if (isNaN(amount) || isNaN(date.getTime()) || !entryType) {
                 console.warn('Skipping malformed entry:', entry);
                 return false;
             }
@@ -650,7 +722,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (entryType !== 'gains') return false; 
                 } else if (lowerCaseSelectedCategory === 'expenses') { 
                     if (entryType !== 'expenses') return false; 
-                } else if (entryWhatKind !== lowerCaseSelectedCategory) { // Filter by 'What kind?'
+                } else if (entryWhatKind !== lowerCaseSelectedCategory) {
                     return false; 
                 }
             }
@@ -691,7 +763,7 @@ document.addEventListener('DOMContentLoaded', () => {
             groupedTransactions[dateHeader].push(entry);
         });
 
-        Object.keys(groupedTransactions).sort((a,b) => { /* existing sort logic */
+        Object.keys(groupedTransactions).sort((a,b) => {
             if (a === 'Today') return -1; if (b === 'Today') return 1;
             if (a === 'Yesterday') return -1; if (b === 'Yesterday') return 1;
             return new Date(b) - new Date(a);
@@ -708,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }).forEach(entry => {
                 const itemDiv = document.createElement('div'); itemDiv.classList.add('transaction-item');
                 const categoryIconDiv = document.createElement('div'); categoryIconDiv.classList.add('transaction-category-icon');
-                const { category: mappedCategory, icon: categoryIcon } = mapCategoryAndIcon(entry); // Pass the full entry
+                const { category: mappedCategory, icon: categoryIcon } = mapCategoryAndIcon(entry);
                 if (entry.Type.toLowerCase() === 'gains') categoryIconDiv.classList.add('category-gain');
                 else {
                     switch (mappedCategory.toLowerCase()) {
@@ -717,7 +789,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         case 'shopping': categoryIconDiv.classList.add('category-shopping'); break;
                         case 'transportation': categoryIconDiv.classList.add('category-transportation'); break;
                         case 'utility bills': categoryIconDiv.classList.add('category-utility-bills'); break;
-                        case 'savings': categoryIconDiv.classList.add('category-savings-expense'); break;
+                        case 'savings': categoryIconDiv.classList.add('category-savings-expense'); break; // New class for savings expenses
                         default: categoryIconDiv.classList.add('category-misc'); break;
                     }
                 }
@@ -744,7 +816,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setupPaginationControls(paginationControlsDiv, totalPages, currentTransactionsPage, (newPage) => {
             currentTransactionsPage = newPage;
-            // Get current filter values to pass them again
             const currentCat = document.getElementById('categoryFilterDropdown').value;
             const currentStart = document.getElementById('startDateInput').value;
             const currentEnd = document.getElementById('endDateInput').value;
@@ -756,6 +827,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Savings Page Specific Logic (savings.html) ---
+    /**
+     * Updates the savings page with total savings and recent savings transactions.
+     */
     async function updateSavingsPage() {
         if (!document.getElementById('savings-page')) return;
         const totalSavingsAmountSpan = document.getElementById('totalSavingsAmount');
@@ -775,16 +849,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isSavingsEntry = (entryWhatKind === 'savings' || entryWhatKind === 'savings contribution') && !isNaN(amount);
 
                 if (isSavingsEntry) {
-                    // REVERSED LOGIC: Gains (type 'gains', kind 'savings contribution' or 'savings') DEDUCT from overall savings
+                    // Logic based on previous understanding of user's CSV data:
+                    // 'Gains' of 'savings contribution' or 'savings' means money MOVED OUT of general funds into savings (decreases general funds, increases savings)
                     if (entryType === 'gains') {
-                        overallTotalSavings -= amount;
-                    } 
-                    // REVERSED LOGIC: Expenses (type 'expenses', kind 'savings') ADD to overall savings
-                    else if (entryType === 'expenses') {
-                        overallTotalSavings += amount;
+                        overallTotalSavings += amount; // Treat this as an increase to savings
                     }
+                    // 'Expenses' of 'savings' means money MOVED OUT of general expenses to savings (increases savings)
+                    else if (entryType === 'expenses') {
+                        overallTotalSavings += amount; // Treat this as an increase to savings
+                    }
+                    // If you have "withdrawal from savings" that is a "gain" to general funds,
+                    // you might need another condition like:
+                    // else if (entryType === 'gains' && entryWhatKind === 'savings withdrawal') {
+                    //     overallTotalSavings -= amount;
+                    // }
                 }
-                return isSavingsEntry; // Only keep these entries for display
+                return isSavingsEntry; // Only keep these entries for display in savings list
             });
             
             if (totalSavingsAmountSpan) totalSavingsAmountSpan.textContent = formatCurrency(overallTotalSavings);
@@ -800,12 +880,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function renderSavingsEntries() { // Uses global allSavingsDataGlobal and currentSavingsPage
+    /**
+     * Renders the paginated list of savings entries.
+     */
+    function renderSavingsEntries() {
         const savingsListDiv = document.getElementById('savingsTransactionsList');
         const paginationControlsDiv = document.getElementById('savingsPaginationControls');
         if (!savingsListDiv || !paginationControlsDiv) return;
 
-        // Data is already filtered and stored in allSavingsDataGlobal
         const sortedSavingsData = [...allSavingsDataGlobal].sort((a, b) => new Date(b.Date) - new Date(a.Date));
 
         const totalItems = sortedSavingsData.length;
@@ -821,7 +903,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         savingsListDiv.innerHTML = ''; // Clear previous items
 
-        // Grouping and rendering logic (similar to renderTransactions)
         const groupedTransactions = {};
         const today = new Date(); today.setHours(0,0,0,0);
         const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
@@ -839,12 +920,12 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.keys(groupedTransactions).sort((a,b) => {
              if (a === 'Today') return -1; if (b === 'Today') return 1;
              if (a === 'Yesterday') return -1; if (b === 'Yesterday') return 1;
-             return new Date(b) - new Date(a); // Sort by date desc
+             return new Date(b) - new Date(a);
         }).forEach(dateHeader => {
             const groupDiv = document.createElement('div'); groupDiv.classList.add('transaction-group');
             const headerDiv = document.createElement('div'); headerDiv.classList.add('transaction-date-header'); headerDiv.textContent = dateHeader;
             groupDiv.appendChild(headerDiv);
-            groupedTransactions[dateHeader].sort((a,b) => { /* time sort */
+            groupedTransactions[dateHeader].sort((a,b) => {
                 const timeA = a.Time ? a.Time.split(':').map(Number) : [0,0,0];
                 const timeB = b.Time ? b.Time.split(':').map(Number) : [0,0,0];
                 if(timeA[0] !== timeB[0]) return timeA[0] - timeB[0];
@@ -855,21 +936,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 const categoryIconDiv = document.createElement('div'); categoryIconDiv.classList.add('transaction-category-icon');
                 const amountSpan = document.createElement('span'); amountSpan.classList.add('transaction-amount');
 
-                if (entry.Type && entry.Type.toLowerCase() === 'gains') {
-                    categoryIconDiv.classList.add('category-gain');
-                    categoryIconDiv.textContent = '💰'; // Money bag for gains
-                    amountSpan.classList.add('expense'); // Mark as expense for display given reversed logic
-                } else if (entry.Type && entry.Type.toLowerCase() === 'expenses') {
-                    categoryIconDiv.classList.add('category-expense'); // Or a more specific class if needed for styling
-                    categoryIconDiv.textContent = '📉'; // Downward trend for expenses
-                    amountSpan.classList.add('gain'); // Mark as gain for display given reversed logic
+                // For savings entries, decide icon and color
+                const lowerCaseType = entry.Type ? entry.Type.toLowerCase() : '';
+                const lowerCaseWhatKind = entry['What kind?'] ? entry['What kind?'].toLowerCase() : '';
+
+                if (lowerCaseType === 'gains' && (lowerCaseWhatKind === 'savings contribution' || lowerCaseWhatKind === 'savings')) {
+                    categoryIconDiv.classList.add('category-gain'); // Represents a deposit/contribution
+                    categoryIconDiv.textContent = '⬆️'; // Up arrow for money going in
+                    amountSpan.classList.add('gain');
+                } else if (lowerCaseType === 'expenses' && lowerCaseWhatKind === 'savings') {
+                    categoryIconDiv.classList.add('category-savings-expense'); // Use a specific class for savings expense
+                    categoryIconDiv.textContent = '📥'; // In-box for money going into savings
+                    amountSpan.classList.add('gain'); // Treat as a positive for overall savings calculation view
                 }
+                // Add more conditions if there are explicit "savings withdrawals" that are type "gains"
+                // else if (lowerCaseType === 'gains' && lowerCaseWhatKind === 'savings withdrawal') {
+                //     categoryIconDiv.classList.add('category-expense'); // Represents a withdrawal
+                //     categoryIconDiv.textContent = '⬇️'; // Down arrow for money coming out
+                //     amountSpan.classList.add('expense');
+                // }
+
+
                 itemDiv.appendChild(categoryIconDiv);
                 
                 const detailsDiv = document.createElement('div'); detailsDiv.classList.add('transaction-details');
                 const nameSpan = document.createElement('span'); nameSpan.classList.add('transaction-name');
                 // Updated logic for display text based on reversed savings logic
-                nameSpan.textContent = entry.Description || (entry.Type && entry.Type.toLowerCase() === 'gains' ? 'Savings Withdrawal' : 'Savings Contribution'); 
+                nameSpan.textContent = entry.Description || (entry.Type && entry.Type.toLowerCase() === 'gains' ? 'Savings Contribution' : 'Savings Deposit'); // Refined descriptions
                 detailsDiv.appendChild(nameSpan);
                 const timeSpan = document.createElement('span'); timeSpan.classList.add('transaction-time');
                 timeSpan.textContent = entry.Time || ''; detailsDiv.appendChild(timeSpan);
@@ -913,7 +1006,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function inputDigit(digit) {
-        if (currentInput === 'Error') currentInput = '0'; // Clear error on new digit
+        if (currentInput === 'Error') currentInput = '0';
         if (waitingForSecondOperand) {
             currentInput = digit;
             waitingForSecondOperand = false;
@@ -924,7 +1017,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function inputDecimal(dot) {
-        if (currentInput === 'Error') currentInput = '0.'; // Clear error
+        if (currentInput === 'Error') currentInput = '0.';
         if (waitingForSecondOperand) {
             currentInput = '0.';
             waitingForSecondOperand = false;
@@ -934,7 +1027,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDisplay();
     }
 
-    // ***** CALCULATOR FIX: Changed keys in performCalculation *****
     const performCalculation = {
         'divide': (first, second) => second === 0 ? 'Error' : first / second,
         'multiply': (first, second) => first * second,
@@ -1048,7 +1140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const addTransactionFab = document.getElementById('addTransactionFab');
     if (addTransactionFab) addTransactionFab.addEventListener('click', () => window.open(GOOGLE_FORM_URL, '_blank'));
 
-    // Initialize page-specific functions
+    // Initialize page-specific functions based on the current HTML file
     if (document.getElementById('dashboard-page')) {
         const dashboardMonthButtons = document.querySelectorAll('#dashboard-page .months-nav .month-button');
         const today = new Date();
@@ -1070,7 +1162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selectedMonth = parseInt(this.dataset.month);
                 // Clear year filter when a month is selected
                 if (dashboardFilterYearSelect) dashboardFilterYearSelect.value = 'All';
-                updateDashboard(selectedMonth);
+                updateDashboard(selectedMonth); // Pass selected month to update dashboard
             });
         });
 
