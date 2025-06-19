@@ -27,6 +27,22 @@
             </ul>
         </div>
 
+        <!-- New: Months Navigation for Dashboard -->
+        <nav class="months-nav">
+            <button class="month-button" data-month="1">Jan</button>
+            <button class="month-button" data-month="2">Feb</button>
+            <button class="month-button" data-month="3">Mar</button>
+            <button class="month-button" data-month="4">Apr</button>
+            <button class="month-button" data-month="5">May</button>
+            <button class="month-button" data-month="6">Jun</button>
+            <button class="month-button" data-month="7">Jul</button>
+            <button class="month-button" data-month="8">Aug</button>
+            <button class="month-button" data-month="9">Sep</button>
+            <button class="month-button" data-month="10">Oct</button>
+            <button class="month-button" data-month="11">Nov</button>
+            <button class="month-button" data-month="12">Dec</button>
+        </nav>
+
         <main class="main-content">
             <section class="card summary-card">
                 <div class="chart-header">
@@ -79,8 +95,8 @@
                 <div class="promo-text">
                     <h2>Current Savings!</h2>
                     <div class="amount-and-button-wrapper">
-                        <span class="savings-amount" id="savingsAmount">₱ 0.00</span>
-                        <button class="mask-button" id="maskSavingsButton">Mask</button>
+                        <span class="savings-amount" id="savingsAmount">₱ ●●●,●●●.●●</span>
+                        <button class="mask-button" id="maskSavingsButton">Show</button>
                     </div>
                     <a href="savings.html" class="view-savings-button">View Savings</a>
                 </div>
@@ -94,12 +110,24 @@
                 </div>
                 <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQpj4q0I_0ueCPz6ofi7pE8JMqId_ZJr1bFP4aGIm0nRpDCVV-Sx52Z-pjW&s=10" alt="Card Illustration" class="card-illustration">
             </section>
+
+            <!-- New: Upcoming Bills Card -->
+            <section class="card upcoming-bills-card" id="upcomingBillsCard">
+                <div class="card-header">
+                    <h2>Upcoming Bills</h2>
+                </div>
+                <div id="upcomingBillsList" class="transactions-list">
+                    <!-- Bills will be dynamically inserted here -->
+                    <p style="text-align: center; color: var(--text-light); padding: 1rem;">No upcoming bills found.</p>
+                </div>
+            </section>
         </main>
     </div>
 
     <button class="fab-button" id="addTransactionFab">+</button>
     <button class="fab-button fab-calculator" id="openCalculatorFab">CALC</button>
 
+    <!-- Filter Modal for Dashboard (Existing, but linked to new dashboard filter logic) -->
     <div class="filter-modal-overlay" id="filterModalOverlay">
         <div class="filter-modal-card">
             <div class="filter-modal-header">
@@ -136,6 +164,7 @@
         </div>
     </div>
 
+    <!-- Calculator Overlay (Existing) -->
     <div class="calculator-overlay" id="calculatorOverlay">
         <div class="calculator-card" id="calculatorCard">
             <div class="calculator-header">
