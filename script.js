@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgMFbI8pivLbRpc2nL2Gyoxw47PmXEVxvUDrjr-t86gj4-J3QM8uV7m8iJN9wxlYo3IY5FQqqUICei/pub?output=csv';
+    const CSV_URL = 'https://docs.google.com/sheets/d/e/2PACX-1vQgMFbI8pivLbRpc2nL2Gyoxw47PmXEVxvUDrjr-t86gj4-J3QM8uV7m8iJN9wxlYo3IY5FQqqUICei/pub?output=csv';
     const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdrDJoOeo264aOn4g2UEh-K-FHpbssBAVmEtOWoW46Q1cwjgg/viewform?usp=header'; // Corrected GOOGLE_FORM_URL based on previous context, ensure it is correct.
 
     // --- Pagination Globals ---
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Google One', dueDay: 29 },
         { name: 'Converge', dueDay: 20 }
     ];
-    let paidBills = new Set(); // In-memory set to track paid bills for current session
+    // No longer using paidBills Set for persistence, moved to transaction-based checking
 
     function parseCSV(csv) {
         const lines = csv.split('\n').filter(line => line.trim() !== '');
@@ -363,38 +363,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- New: Upcoming Bills Logic ---
     function calculateNextSalaryDate() {
         const today = new Date();
+        today.setHours(0,0,0,0); // Normalize today to start of day
         const firstPayday = new Date('2025-06-20T00:00:00'); // Thursday, June 20, 2025 (user's given start date)
         
-        let nextPayday = new Date(firstPayday);
-
-        // Find the next payday after or on today
-        while (nextPayday < today) {
-            nextPayday.setDate(nextPayday.getDate() + 14); // Add two weeks
-        }
-
-        // If today is a payday, and it's the start of the cycle, the next salary is two weeks later.
-        // If today is between paydays, the 'nextPayday' calculated above is the upcoming one.
-        // For the purpose of showing bills *up to* the next salary, we need the *next* payday
-        // that is strictly greater than today, if today is also a payday.
-        // The problem description: "the bill will only show for the upcoming scheduled salary"
-        // and "if my bill falls july 2, 2025, then it will only show if my next salary is june 20, 2025"
-        // This implies bills are displayed for the period *leading up to* a payday.
-
-        // So, we need the payday that *covers* the current period.
-        // Let's re-evaluate:
-        // Current date: June 20 (Payday)
-        // Next Payday: July 4
-        // Bills to show: Between June 20 (current) and July 4.
-
-        // Let's adjust the logic to find the *immediate next* payday from today.
         let currentIterDate = new Date(firstPayday);
+
+        // Find the *first* payday that is greater than or equal to today
         while (currentIterDate < today) {
-            currentIterDate.setDate(currentIterDate.getDate() + 14);
+            currentIterDate.setDate(currentIterDate.getDate() + 14); // Add two weeks
         }
 
-        // If currentIterDate is exactly today, and today is a payday, then the "upcoming" salary
-        // is the one two weeks from now. Otherwise, currentIterDate is already the upcoming payday.
+        // If today is a payday (currentIterDate === today), then the "upcoming" salary
+        // for the *next* period is two weeks from now.
+        // Otherwise, currentIterDate is already the upcoming payday for the current period.
         if (currentIterDate.getTime() === today.getTime()) {
+             // If today is a payday, we want to look at bills due *before* the *next* payday
              currentIterDate.setDate(currentIterDate.getDate() + 14);
         }
 
@@ -427,18 +410,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // Check if this bill has been "paid" in the current session
-            if (paidBills.has(bill.name)) {
-                return; // Skip if already marked as paid
+            // Define the payment window for this bill
+            const paymentWindowStart = new Date(nextDueDate);
+            paymentWindowStart.setDate(nextDueDate.getDate() - 5);
+            paymentWindowStart.setHours(0, 0, 0, 0);
+
+            const paymentWindowEnd = new Date(nextDueDate);
+            paymentWindowEnd.setDate(nextDueDate.getDate() + 5);
+            paymentWindowEnd.setHours(23, 59, 59, 999);
+
+            let isBillPaid = false;
+
+            // Check if there's a transaction marking this bill as paid
+            for (const transaction of allTransactionsData) {
+                const transactionDate = new Date(transaction.Date);
+                transactionDate.setHours(0, 0, 0, 0);
+
+                const transactionDescription = (transaction.Description || transaction['What kind?'] || '').toLowerCase();
+                const billNameLower = bill.name.toLowerCase();
+
+                // Check for date range and name match and if it's an expense
+                if (transactionDate >= paymentWindowStart && transactionDate <= paymentWindowEnd &&
+                    (transactionDescription.includes(billNameLower) || billNameLower.includes(transactionDescription)) &&
+                    transaction.Type.toLowerCase() === 'expenses') { // Assuming bill payments are 'expenses'
+                    isBillPaid = true;
+                    break; // Found a payment, no need to check further for this bill
+                }
             }
 
-            // Only include bills whose due date is before or on the next salary date
-            if (nextDueDate <= nextSalaryDate) {
+            // Only include bills whose due date is before or on the next salary date AND are not yet paid
+            if (nextDueDate <= nextSalaryDate && !isBillPaid) {
                 upcomingBills.push({
                     name: bill.name,
                     dueDate: nextDueDate,
-                    // Assume a placeholder amount or retrieve from a different source if available
-                    amount: 'N/A' // Or a default value if you have one
+                    amount: 'N/A' // Placeholder, as amount data is not provided in problem
                 });
             }
         });
@@ -477,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dateSpan.textContent = `Due: ${bill.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
             detailsDiv.appendChild(dateSpan);
             
-            // If you have amounts for bills, display them here
+            // Amount display (if available)
             // const amountSpan = document.createElement('span');
             // amountSpan.classList.add('upcoming-bill-amount');
             // amountSpan.textContent = formatCurrency(bill.amount);
@@ -485,15 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             billItemDiv.appendChild(detailsDiv);
 
-            const markPaidButton = document.createElement('button');
-            markPaidButton.classList.add('mark-as-paid-button');
-            markPaidButton.textContent = 'Mark as Paid';
-            markPaidButton.addEventListener('click', () => {
-                paidBills.add(bill.name); // Add to paid set
-                renderUpcomingBills(); // Re-render to hide this bill
-            });
-            billItemDiv.appendChild(markPaidButton);
-
+            // Removed the "Mark as Paid" button as per new requirements
             upcomingBillsListDiv.appendChild(billItemDiv);
         });
     }
