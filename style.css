@@ -1297,29 +1297,7 @@ body.dark-mode .upcoming-bill-item {
     margin-top: 2px;
 }
 
-.mark-as-paid-button {
-    background-color: var(--accent-green);
-    color: white;
-    padding: 6px 12px;
-    border: none;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    margin-left: 15px;
-    flex-shrink: 0;
-    transition: background-color 0.2s, opacity 0.2s;
-}
-
-.mark-as-paid-button:hover {
-    background-color: #43A047;
-}
-
-.mark-as-paid-button:disabled {
-    background-color: var(--text-light);
-    cursor: not-allowed;
-    opacity: 0.7;
-}
+/* Removed .mark-as-paid-button as it is no longer used */
 
 .upcoming-bills-card .transactions-list {
     padding: 0; /* Remove horizontal padding here as bill items have their own */
