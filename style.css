@@ -758,6 +758,8 @@ body.dark-mode .filter-options-container select {
 .transaction-category-icon.category-medicines { background-color: #FFEBEE; color: #D32F2F; }
 .transaction-category-icon.category-shopping { background-color: #E3F2FD; color: #1976D2; }
 .transaction-category-icon.category-misc { background-color: #EDE7F6; color: #512DA8; } /* Changed default misc color slightly */
+.transaction-category-icon.category-utility-bills { background-color: #E0F7FA; color: #00BCD4; } /* New: Utility Bills color */
+
 
 /* Dark mode adjustments for icons */
 body.dark-mode .transaction-category-icon.category-gain { background-color: #388E3C; color: #C8E6C9; } /* Lighter green text for dark bg */
@@ -765,6 +767,7 @@ body.dark-mode .transaction-category-icon.category-food { background-color: #FFA
 body.dark-mode .transaction-category-icon.category-medicines { background-color: #D32F2F; color: #FFCDD2; }
 body.dark-mode .transaction-category-icon.category-shopping { background-color: #1976D2; color: #BBDEFB; }
 body.dark-mode .transaction-category-icon.category-misc { background-color: #512DA8; color: #D1C4E9; }
+body.dark-mode .transaction-category-icon.category-utility-bills { background-color: #00BCD4; color: #B2EBF2; } /* Dark mode: Utility Bills color */
 
 
 .transaction-details {
@@ -1234,4 +1237,91 @@ body.dark-mode .filter-modal-body select {
 
 .apply-filter-button:hover {
     background-color: #1976D2;
+}
+
+/* New: Upcoming Bills Card Specific Styles */
+.upcoming-bills-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+}
+
+.upcoming-bills-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.upcoming-bills-card h2 {
+    font-size: 1.3rem;
+    margin: 0;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.upcoming-bill-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Distribute items */
+    background-color: var(--primary-bg);
+    border-radius: 10px;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    box-shadow: inset 0 0 0 1px var(--border-color); /* Inner border for a subtle look */
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+body.dark-mode .upcoming-bill-item {
+    background-color: #444444; /* Darker background for items in dark mode */
+    box-shadow: inset 0 0 0 1px #555555;
+}
+
+.upcoming-bill-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.upcoming-bill-name {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.upcoming-bill-date {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 2px;
+}
+
+.mark-as-paid-button {
+    background-color: var(--accent-green);
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-left: 15px;
+    flex-shrink: 0;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.mark-as-paid-button:hover {
+    background-color: #43A047;
+}
+
+.mark-as-paid-button:disabled {
+    background-color: var(--text-light);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.upcoming-bills-card .transactions-list {
+    padding: 0; /* Remove horizontal padding here as bill items have their own */
+    margin-top: 0; /* Remove extra top margin */
 }
