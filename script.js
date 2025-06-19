@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS6QS-O5TLQmVn8WMeyfSVmLfJPtL11TwmnZn4NVgklXKFRbJwK5A7jiPYU1srHVDxUDvI8KIXBqnNx/pub?output=csv';
-    const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSe4-6PXN21Zrnexp8bUbdU5IhaokIEoUKwsFeRU0yYzllcPJA/viewform?usp=header';
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQgMFbI8pivLbRpc2nL2Gyoxw47PmXEVxvUDrjr-t86gj4-J3QM8uV7m8iJN9wxlYo3IY5FQqqUICei/pub?output=csv';
+    const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdrDJoOeo264aOn4g2UEh-K-FHpbssBAVmEtOWoW46Q1cwjgg/viewform?usp=header'; // Corrected GOOGLE_FORM_URL based on previous context, ensure it is correct.
 
     // --- Pagination Globals ---
     const ITEMS_PER_PAGE = 15;
@@ -9,6 +9,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let allTransactionsData = []; // Store all fetched data for consistent filtering and pagination
     let allSavingsDataGlobal = []; // Store all fetched savings data for pagination
 
+    // --- Upcoming Bills Data ---
+    const BILLS = [
+        { name: 'Lazada Paylater', dueDay: 16 },
+        { name: 'Atome Card', dueDay: 2 },
+        { name: 'Unionbank Card', dueDay: 10 },
+        { name: 'Maya Credit', dueDay: 11 },
+        { name: 'Netflix', dueDay: 'end' }, // Special handling for end of month
+        { name: 'Google One', dueDay: 29 },
+        { name: 'Converge', dueDay: 20 }
+    ];
+    let paidBills = new Set(); // In-memory set to track paid bills for current session
 
     function parseCSV(csv) {
         const lines = csv.split('\n').filter(line => line.trim() !== '');
@@ -40,12 +51,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return `₱ ${numAmount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
 
-    function mapCategoryAndIcon(type, whatKind) {
+    function mapCategoryAndIcon(entry) {
         let category = 'Misc';
         let icon = '✨';
 
-        const lowerCaseWhatKind = whatKind ? whatKind.toLowerCase() : '';
-        const lowerCaseType = type ? type.Type.toLowerCase() : '';
+        const lowerCaseWhatKind = entry['What kind?'] ? entry['What kind?'].toLowerCase() : '';
+        const lowerCaseType = entry.Type ? entry.Type.toLowerCase() : '';
 
         if (lowerCaseType === 'gains') {
             category = 'Gain';
@@ -53,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'salary': icon = '💸'; break;
                 case 'allowance': icon = '🎁'; break;
                 case 'savings contribution':
-                case 'savings': // Also handle "savings" as a gain type
+                case 'savings':
                     icon = '💰'; break;
                 default: icon = '💰'; break;
             }
@@ -62,10 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'food': case 'groceries': category = 'Food'; icon = '🍔'; break;
                 case 'medicines': category = 'Medicines'; icon = '💊'; break;
                 case 'online shopping': category = 'Shopping'; icon = '🛍️'; break;
-                case 'transportation': icon = '🚌'; break;
-                case 'utility bills': category = 'Utility Bills'; icon = '💡'; break;
-                case 'savings': // Handle "savings" as an expense type for deductions
-                    icon = '📉'; // A distinct icon for savings deductions
+                case 'transportation': category = 'Transportation'; icon = '🚌'; break; // Added Transportation
+                case 'utility bills': category = 'Utility Bills'; icon = '💡'; break; // Added Utility Bills
+                case 'savings':
+                    icon = '📉';
                     break;
                 default: category = 'Misc'; icon = '✨'; break;
             }
@@ -93,10 +104,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 body.classList.add('light-mode');
                 localStorage.setItem('theme', 'light-mode');
             }
-            // Re-render chart to apply new colors based on current filters
-            const currentMonth = document.getElementById('filterMonth').value;
-            const currentYear = document.getElementById('filterYear').value;
-            updateDashboard(currentMonth, currentYear);
+            // Re-render chart and upcoming bills to apply new colors based on current filters
+            // For dashboard, re-apply filters that might be set
+            if (document.getElementById('dashboard-page')) {
+                const filterMonthSelect = document.getElementById('filterMonth');
+                const filterYearSelect = document.getElementById('filterYear');
+                const selectedMonth = filterMonthSelect ? filterMonthSelect.value : 'All';
+                const selectedYear = filterYearSelect ? filterYearSelect.value : 'All';
+                updateDashboard(selectedMonth, selectedYear);
+            }
         });
     }
 
@@ -157,18 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
             let totalExpensesAmount = 0;
             let totalGainsAmount = 0;
             let totalSavingsAmount = 0; // Initialize savings total
-            const expenseCategoriesForChart = { Food: 0, Medicines: 0, Shopping: 0, Misc: 0 };
+            const expenseCategoriesForChart = { Food: 0, Medicines: 0, Shopping: 0, Misc: 0 }; // Initialize with 0 for all categories
 
-            allTransactionsData.forEach(entry => {
-                const amount = parseFloat(entry.Amount);
-                const entryType = entry.Type ? entry.Type.toLowerCase() : '';
-                const entryWhatKind = entry['What kind?'] ? entry['What kind?'].toLowerCase() : '';
-
+            // Filter data based on selected month/year BEFORE calculating sums
+            const filteredDashboardData = allTransactionsData.filter(entry => {
                 const entryDate = new Date(entry.Date);
-                if (isNaN(amount) || !entryType || isNaN(entryDate)) {
-                    console.warn('Dashboard - Skipping malformed entry:', entry);
-                    return;
-                }
+                if (isNaN(entryDate.getTime())) return false; // Skip invalid dates
 
                 const entryMonth = entryDate.getMonth() + 1; // 1-indexed month
                 const entryYear = entryDate.getFullYear();
@@ -176,8 +186,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const matchesMonth = (filterMonth === 'All' || entryMonth === parseInt(filterMonth));
                 const matchesYear = (filterYear === 'All' || entryYear === parseInt(filterYear));
 
-                if (!matchesMonth || !matchesYear) {
-                    return; // Skip if it doesn't match the selected filters
+                return matchesMonth && matchesYear;
+            });
+
+            filteredDashboardData.forEach(entry => {
+                const amount = parseFloat(entry.Amount);
+                const entryType = entry.Type ? entry.Type.toLowerCase() : '';
+                const entryWhatKind = entry['What kind?'] ? entry['What kind?'].toLowerCase() : '';
+
+                if (isNaN(amount) || !entryType) {
+                    console.warn('Dashboard - Skipping malformed entry:', entry);
+                    return;
                 }
 
                 if (entryType === 'expenses') {
@@ -188,14 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     else if (entryWhatKind === 'online shopping') expenseCategoriesForChart.Shopping += amount;
                     else expenseCategoriesForChart.Misc += amount; // All other expenses go to Misc
 
-                    // REVERSED LOGIC: Expenses (type 'expenses', kind 'savings') ADD to total savings
                     if (entryWhatKind === 'savings') {
                         totalSavingsAmount += amount;
                     }
 
                 } else if (entryType === 'gains') {
                     totalGainsAmount += amount;
-                    // REVERSED LOGIC: Gains (type 'gains', kind 'savings contribution' or 'savings') DEDUCT from total savings
                     if (entryWhatKind === 'savings contribution' || entryWhatKind === 'savings') {
                         totalSavingsAmount -= amount;
                     }
@@ -241,13 +258,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('medicinesPct').textContent = `${totalCategoryExpenseForChart > 0 ? Math.round((expenseCategoriesForChart.Medicines / totalCategoryExpenseForChart) * 100) : 0}%`;
             document.getElementById('shoppingPct').textContent = `${totalCategoryExpenseForChart > 0 ? Math.round((expenseCategoriesForChart.Shopping / totalCategoryExpenseForChart) * 100) : 0}%`;
             document.getElementById('miscPct').textContent = `${totalCategoryExpenseForChart > 0 ? Math.round((expenseCategoriesForChart.Misc / totalCategoryExpenseForChart) * 100) : 0}%`;
-            // Ensure Utility Bills is also updated if it was a category in the original code
-            // (It was removed from chart categories in the previous update, but keeping this for robustness if it was intended)
-            // If Utility Bills is truly not a separate category for the chart, remove this line and its corresponding legend item in HTML.
-            // For now, based on the original HTML, it's not a separate legend item, so this line might be redundant if the chart only shows 4 categories.
-            // If you want Utility Bills to be a separate slice, you'd need to add it to expenseCategoriesForChart and the legend.
-            // Since the request was to *revert* other changes, I'll assume the original 4 categories (Food, Meds, Shopping, Misc) for the chart.
-
 
             const ctx = document.getElementById('expenseChart');
             if (ctx) {
@@ -283,13 +293,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (savingsAmountSpan) {
                 savingsAmountSpan.dataset.actualAmount = totalSavingsAmount;
                 // Set to masked value initially
-                savingsAmountSpan.textContent = '₱ ●●●,●●●.●●';
-                // Also update the button text to 'Show'
-                const maskSavingsButton = document.getElementById('maskSavingsButton');
-                if (maskSavingsButton) {
-                    maskSavingsButton.textContent = 'Show';
+                // The HTML is already set to masked, so just ensure the actual amount is stored.
+                // If it was unmasked before, re-mask it.
+                if (maskSavingsButton && maskSavingsButton.textContent === 'Mask') {
+                     savingsAmountSpan.textContent = formatCurrency(totalSavingsAmount);
+                } else {
+                     savingsAmountSpan.textContent = '₱ ●●●,●●●.●●';
                 }
             }
+            renderUpcomingBills(); // Call this after updating dashboard data
         } catch (error) {
             console.error('Error fetching or processing CSV for dashboard:', error);
             // Handle errors gracefully
@@ -312,15 +324,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Filter Modal Pop-up Logic ---
+    // --- Filter Modal Pop-up Logic for Dashboard ---
     const filterChartButton = document.getElementById('filterChartButton');
     const filterModalOverlay = document.getElementById('filterModalOverlay');
     const closeFilterModalButton = document.getElementById('closeFilterModalButton');
-    const filterMonthSelect = document.getElementById('filterMonth');
-    const filterYearSelect = document.getElementById('filterYear');
+    const dashboardFilterMonthSelect = document.getElementById('filterMonth');
+    const dashboardFilterYearSelect = document.getElementById('filterYear');
     const applyChartFilterButton = document.getElementById('applyChartFilter');
 
-    if (filterChartButton && filterModalOverlay && closeFilterModalButton && filterMonthSelect && filterYearSelect && applyChartFilterButton) {
+    if (filterChartButton && filterModalOverlay && closeFilterModalButton && dashboardFilterMonthSelect && dashboardFilterYearSelect && applyChartFilterButton) {
         filterChartButton.addEventListener('click', () => {
             filterModalOverlay.classList.add('active');
         });
@@ -337,10 +349,152 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         applyChartFilterButton.addEventListener('click', () => {
-            const selectedMonth = filterMonthSelect.value;
-            const selectedYear = filterYearSelect.value;
+            const selectedMonth = dashboardFilterMonthSelect.value;
+            const selectedYear = dashboardFilterYearSelect.value;
             updateDashboard(selectedMonth, selectedYear); // Re-render dashboard with filters
             filterModalOverlay.classList.remove('active'); // Close modal
+
+            // Clear month selection in the month navigation if a year filter is applied
+            const dashboardMonthButtons = document.querySelectorAll('#dashboard-page .months-nav .month-button');
+            dashboardMonthButtons.forEach(btn => btn.classList.remove('active'));
+        });
+    }
+
+    // --- New: Upcoming Bills Logic ---
+    function calculateNextSalaryDate() {
+        const today = new Date();
+        const firstPayday = new Date('2025-06-20T00:00:00'); // Thursday, June 20, 2025 (user's given start date)
+        
+        let nextPayday = new Date(firstPayday);
+
+        // Find the next payday after or on today
+        while (nextPayday < today) {
+            nextPayday.setDate(nextPayday.getDate() + 14); // Add two weeks
+        }
+
+        // If today is a payday, and it's the start of the cycle, the next salary is two weeks later.
+        // If today is between paydays, the 'nextPayday' calculated above is the upcoming one.
+        // For the purpose of showing bills *up to* the next salary, we need the *next* payday
+        // that is strictly greater than today, if today is also a payday.
+        // The problem description: "the bill will only show for the upcoming scheduled salary"
+        // and "if my bill falls july 2, 2025, then it will only show if my next salary is june 20, 2025"
+        // This implies bills are displayed for the period *leading up to* a payday.
+
+        // So, we need the payday that *covers* the current period.
+        // Let's re-evaluate:
+        // Current date: June 20 (Payday)
+        // Next Payday: July 4
+        // Bills to show: Between June 20 (current) and July 4.
+
+        // Let's adjust the logic to find the *immediate next* payday from today.
+        let currentIterDate = new Date(firstPayday);
+        while (currentIterDate < today) {
+            currentIterDate.setDate(currentIterDate.getDate() + 14);
+        }
+
+        // If currentIterDate is exactly today, and today is a payday, then the "upcoming" salary
+        // is the one two weeks from now. Otherwise, currentIterDate is already the upcoming payday.
+        if (currentIterDate.getTime() === today.getTime()) {
+             currentIterDate.setDate(currentIterDate.getDate() + 14);
+        }
+
+        return currentIterDate;
+    }
+
+    function getUpcomingBills() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalize to start of day
+        const nextSalaryDate = calculateNextSalaryDate();
+
+        const upcomingBills = [];
+
+        BILLS.forEach(bill => {
+            let nextDueDate = new Date(today.getFullYear(), today.getMonth(), 1); // Start of current month
+
+            if (bill.dueDay === 'end') {
+                nextDueDate = new Date(today.getFullYear(), today.getMonth() + 1, 0); // Last day of current month
+            } else {
+                nextDueDate.setDate(bill.dueDay); // Set to specific day of current month
+            }
+
+            // If the calculated nextDueDate is in the past, move it to the next month
+            while (nextDueDate < today) {
+                nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+                if (bill.dueDay === 'end') {
+                    nextDueDate = new Date(nextDueDate.getFullYear(), nextDueDate.getMonth() + 1, 0);
+                } else {
+                    nextDueDate.setDate(bill.dueDay);
+                }
+            }
+            
+            // Check if this bill has been "paid" in the current session
+            if (paidBills.has(bill.name)) {
+                return; // Skip if already marked as paid
+            }
+
+            // Only include bills whose due date is before or on the next salary date
+            if (nextDueDate <= nextSalaryDate) {
+                upcomingBills.push({
+                    name: bill.name,
+                    dueDate: nextDueDate,
+                    // Assume a placeholder amount or retrieve from a different source if available
+                    amount: 'N/A' // Or a default value if you have one
+                });
+            }
+        });
+
+        // Sort bills by due date
+        upcomingBills.sort((a, b) => a.dueDate - b.dueDate);
+        return upcomingBills;
+    }
+
+    function renderUpcomingBills() {
+        const upcomingBillsListDiv = document.getElementById('upcomingBillsList');
+        if (!upcomingBillsListDiv) return;
+
+        const billsToDisplay = getUpcomingBills();
+        upcomingBillsListDiv.innerHTML = ''; // Clear previous bills
+
+        if (billsToDisplay.length === 0) {
+            upcomingBillsListDiv.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 1rem;">No upcoming bills for this pay period.</p>';
+            return;
+        }
+
+        billsToDisplay.forEach(bill => {
+            const billItemDiv = document.createElement('div');
+            billItemDiv.classList.add('upcoming-bill-item');
+
+            const detailsDiv = document.createElement('div');
+            detailsDiv.classList.add('upcoming-bill-details');
+
+            const nameSpan = document.createElement('span');
+            nameSpan.classList.add('upcoming-bill-name');
+            nameSpan.textContent = bill.name;
+            detailsDiv.appendChild(nameSpan);
+
+            const dateSpan = document.createElement('span');
+            dateSpan.classList.add('upcoming-bill-date');
+            dateSpan.textContent = `Due: ${bill.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            detailsDiv.appendChild(dateSpan);
+            
+            // If you have amounts for bills, display them here
+            // const amountSpan = document.createElement('span');
+            // amountSpan.classList.add('upcoming-bill-amount');
+            // amountSpan.textContent = formatCurrency(bill.amount);
+            // detailsDiv.appendChild(amountSpan);
+
+            billItemDiv.appendChild(detailsDiv);
+
+            const markPaidButton = document.createElement('button');
+            markPaidButton.classList.add('mark-as-paid-button');
+            markPaidButton.textContent = 'Mark as Paid';
+            markPaidButton.addEventListener('click', () => {
+                paidBills.add(bill.name); // Add to paid set
+                renderUpcomingBills(); // Re-render to hide this bill
+            });
+            billItemDiv.appendChild(markPaidButton);
+
+            upcomingBillsListDiv.appendChild(billItemDiv);
         });
     }
 
@@ -420,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let initialMonth = today.getMonth() + 1;
 
             // Set initial active month button
-            const monthButtons = document.querySelectorAll('.month-button');
+            const monthButtons = document.querySelectorAll('#transactions-page .month-button');
             monthButtons.forEach(button => {
                 button.classList.remove('active');
                 if (parseInt(button.dataset.month) === initialMonth) {
@@ -489,6 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const entryDate = new Date(entry.Date);
             entryDate.setHours(0, 0, 0, 0);
 
+            // Filter by month if no date range is provided
             if (selectedMonth && !startDate && !endDate && entryDate.getMonth() + 1 !== selectedMonth) return false;
 
             if (selectedCategory) {
@@ -556,16 +711,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }).forEach(entry => {
                 const itemDiv = document.createElement('div'); itemDiv.classList.add('transaction-item');
                 const categoryIconDiv = document.createElement('div'); categoryIconDiv.classList.add('transaction-category-icon');
-                const { category: mappedCategory, icon: categoryIcon } = mapCategoryAndIcon(entry, entry['What kind?']);
+                const { category: mappedCategory, icon: categoryIcon } = mapCategoryAndIcon(entry); // Pass the full entry
                 if (entry.Type.toLowerCase() === 'gains') categoryIconDiv.classList.add('category-gain');
                 else {
                     switch (mappedCategory.toLowerCase()) {
                         case 'food': categoryIconDiv.classList.add('category-food'); break;
                         case 'medicines': categoryIconDiv.classList.add('category-medicines'); break;
                         case 'shopping': categoryIconDiv.classList.add('category-shopping'); break;
-                        case 'transportation': categoryIconDiv.classList.add('category-transportation'); break; // Ensure this is styled in CSS
-                        case 'utility bills': categoryIconDiv.classList.add('category-utility-bills'); break; // Ensure this is styled in CSS
-                        case 'savings': categoryIconDiv.classList.add('category-savings-expense'); break; // New class for savings expense
+                        case 'transportation': categoryIconDiv.classList.add('category-transportation'); break;
+                        case 'utility bills': categoryIconDiv.classList.add('category-utility-bills'); break;
+                        case 'savings': categoryIconDiv.classList.add('category-savings-expense'); break;
                         default: categoryIconDiv.classList.add('category-misc'); break;
                     }
                 }
@@ -898,7 +1053,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize page-specific functions
     if (document.getElementById('dashboard-page')) {
-        updateDashboard(); // Initial call to load data and render chart
+        const dashboardMonthButtons = document.querySelectorAll('#dashboard-page .months-nav .month-button');
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1; // 1-indexed
+
+        // Set initial active month button on dashboard
+        dashboardMonthButtons.forEach(button => {
+            button.classList.remove('active');
+            if (parseInt(button.dataset.month) === currentMonth) {
+                button.classList.add('active');
+            }
+        });
+
+        // Event listeners for month buttons on dashboard
+        dashboardMonthButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                dashboardMonthButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                const selectedMonth = parseInt(this.dataset.month);
+                // Clear year filter when a month is selected
+                if (dashboardFilterYearSelect) dashboardFilterYearSelect.value = 'All';
+                updateDashboard(selectedMonth);
+            });
+        });
+
+        updateDashboard(currentMonth); // Initial call to load data and render chart for current month
     } else if (document.getElementById('transactions-page')) {
         const filterButton = document.getElementById('filterButton');
         const filterOptionsContainer = document.getElementById('filterOptionsContainer');
@@ -907,7 +1086,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const endDateInput = document.getElementById('endDateInput');
         const applyFiltersButton = document.getElementById('applyFiltersButton');
         const clearFiltersButton = document.getElementById('clearFiltersButton');
-        const monthButtons = document.querySelectorAll('.months-nav .month-button');
+        const monthButtons = document.querySelectorAll('#transactions-page .months-nav .month-button');
 
         if (filterButton) filterButton.addEventListener('click', () => filterOptionsContainer.style.display = filterOptionsContainer.style.display === 'flex' ? 'none' : 'flex');
         
@@ -928,7 +1107,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 categoryFilterDropdown.value = ''; startDateInput.value = ''; endDateInput.value = '';
                 const today = new Date(); const currentMonth = today.getMonth() + 1;
                 monthButtons.forEach(btn => btn.classList.remove('active'));
-                const currentMonthBtn = document.querySelector(`.months-nav .month-button[data-month="${currentMonth}"]`);
+                const currentMonthBtn = document.querySelector(`#transactions-page .months-nav .month-button[data-month="${currentMonth}"]`);
                 if (currentMonthBtn) currentMonthBtn.classList.add('active');
                 renderTransactions(currentMonth);
                 if(filterOptionsContainer) filterOptionsContainer.style.display = 'none';
